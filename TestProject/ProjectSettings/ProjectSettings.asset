@@ -511,7 +511,7 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: TestProject
   metroPackageVersion: 1.0.0.0
-  metroCertificatePath: C:\Users\KP_RBIR\Git\kp-17-uie-imt-rbir\TestProject\Assets\WSATestCertificate.pfx
+  metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
   metroCertificateSubject: DefaultCompany
   metroCertificateIssuer: DefaultCompany
