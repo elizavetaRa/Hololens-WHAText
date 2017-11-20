@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if (PLATFORM_HOLOLENS)
+using System.Net;
+using System.IO;
+#if (!UNITY_EDITOR)
+using System.Threading.Tasks;
 using Windows.Globalization;
 using Windows.Media.Ocr;
 using Windows.Foundation;
-using Windows.Globalization;
 using Windows.Graphics.Imaging;
-using Windows.Media.Ocr;
 using Windows.Storage;
 using Windows.UI.Xaml.Media.Imaging;
 #endif
@@ -22,20 +23,25 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
     private static ApiMicrosoftMediaOcr instance = null;
 
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
+    private Language preferredLang;
+#endif
+
+#if (!UNITY_EDITOR)
     private IReadOnlyList<Language> AvailableLanguages;
     private SoftwareBitmap bitmap;
 #endif
 
     private ApiMicrosoftMediaOcr(string preferredLang)
     {
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
+        Debug.WriteLine(OcrEngine.AvailableRecognizerLanguages);
         CheckForAvailableLanguages();
         this.preferredLang = new Language(preferredLang);
 
-        if (!IsLanguageSupported(this.preferredLang))
+        if (!IsLanguageSupported(PreferredLang))
         {
-            this.preferredLang = AvailableLanguages[0];
+            PreferredLang = AvailableLanguages[0];
         }
 #endif
 
@@ -48,24 +54,24 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         {
             if (instance == null)
             {
-                instance = new ApiMicrosoftMediaOcr("en");
+                instance = new ApiMicrosoftMediaOcr("en-US");
             }
 
             return instance;
         }
     }
 
-#if (PLATFORM_HOLOLENS)
-    public Language preferredLang
+#if (!UNITY_EDITOR)
+    public Language PreferredLang
     {
         get
         {
-            return this.preferredLang;
+            return preferredLang;
         }
 
         set 
         {
-            this.preferredLang = value;
+            preferredLang = value;
         }
     }
 #endif
@@ -96,7 +102,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         }
     }
 
-#if (HOLOLENS_PLATFORM)
+#if (!UNITY_EDITOR)
     /// <summary>
     /// Check for any Ocr languages available on the HoloLens
     /// </summary>
@@ -125,11 +131,12 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
     public void HttpPostImage(string url = null, byte[] jsonBytes = null)
     {
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
             IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
                 async (workItem) =>
                 {
-                    OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(this.preferredLang);
+                    OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
+                    await LoadSampleImage();
 
                     if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
                     {
@@ -151,7 +158,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
     public void GetDataAsync(string url, string id, OnGetDataCompleted handler)
     {
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
             IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
                 async (workItem) =>
                 {
@@ -188,7 +195,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     }
 
 
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
         private void PostDataAsyncCompleted(IAsyncAction asyncInfo, AsyncStatus asyncStatus)
         {
             
@@ -219,8 +226,9 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
         private async Task LoadSampleImage()
         {
-            var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Images\\Schriftarten.PNG");
-            await LoadImage(file);
+        System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
+        var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
+        await LoadImage(file);
         }
 
 #endif

@@ -543,18 +543,18 @@ namespace HoloToolkit.Unity.InputModule
         {
             Debug.Assert(pointer.End.Point != Vector3.zero, string.Format("No pointer {0} end point found to raycast against!", pointer.PointingSource.GetType()));
             Debug.Assert(UIRaycastCamera != null, "You must assign a UIRaycastCamera on the FocusManager before you can process uGUI raycasting.");
-
+            /*
             // Move the uiRaycast camera to the the current pointer's position.
             UIRaycastCamera.transform.position = pointer.PointingSource.Ray.origin;
             UIRaycastCamera.transform.forward = pointer.PointingSource.Ray.direction;
 
             // We always raycast from the center of the camera.
             pointer.UnityUIPointerData.position = new Vector2(UIRaycastCamera.pixelWidth * 0.5f, UIRaycastCamera.pixelHeight * 0.5f);
-
+            */
             // Graphics raycast
             RaycastResult uiRaycastResult = EventSystem.current.Raycast(pointer.UnityUIPointerData, prioritizedLayerMasks);
             pointer.UnityUIPointerData.pointerCurrentRaycast = uiRaycastResult;
-
+            
             // If we have a raycast result, check if we need to overwrite the physics raycast info
             if (uiRaycastResult.gameObject != null)
             {

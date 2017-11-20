@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using UnityEngine;
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
 using Windows.Foundation;
 #endif
 
@@ -50,7 +52,7 @@ public class ApiGoogleVisionOcr
 
     public void HttpPostImage(string url, byte[] jsonBytes)
     {
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
             IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
                 async (workItem) =>
                 {
@@ -71,7 +73,7 @@ public class ApiGoogleVisionOcr
 
     public void GetDataAsync(string url, string id, OnGetDataCompleted handler)
     {
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
             IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
                 async (workItem) =>
                 {
@@ -107,7 +109,7 @@ public class ApiGoogleVisionOcr
         throw new NotImplementedException();
     }
 
-#if (PLATFORM_HOLOLENS)
+#if (!UNITY_EDITOR)
         private void PostDataAsyncCompleted(IAsyncAction asyncInfo, AsyncStatus asyncStatus)
         {
             

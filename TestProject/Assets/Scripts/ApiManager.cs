@@ -1,44 +1,47 @@
 ﻿
-public class ApiManager
+using HoloToolkit.Unity;
+using UnityEngine;
+#if (!UNITY_EDITOR)
+using Windows.Media.Ocr;
+#endif
+
+public class ApiManager : Singleton<ApiManager>
 {
 
     private IServiceAdaptor Api;
-    private IServiceAdaptor selectedService;
+    public OcrService SelectedService = OcrService.MICROSOFTMEDIAOCR;
 
-    public ApiManager(OcrService selectedService)
+    protected void Start()
     {
-        switch(selectedService)
+        Debug.Log("Selected Service:" + SelectedService);
+#if (!UNITY_EDITOR)
+        System.Diagnostics.Debug.WriteLine("Selected Service:" + SelectedService);
+#endif
+        if (InitSelectedService())
         {
+            Api.HttpPostImage();
+        }
+    }
+
+    /// <summary>
+    /// Init Class Instance of Selected Service
+    /// </summary>
+    private bool InitSelectedService()
+    {
+        switch (SelectedService)
+        {
+            case OcrService.GOOGLEVISIONOCR:
+#if (!UNITY_EDITOR)
+                System.Diagnostics.Debug.WriteLine("Service not supported at the moment.");
+#endif
+                return false;
             case OcrService.MICROSOFTMEDIAOCR:
-            {
                 Api = ApiMicrosoftMediaOcr.Instance;
-                break;
-            }
+                return true;
             default:
-            {
                 Api = ApiMicrosoftMediaOcr.Instance;
-                break;
-            }
+                return true;
         }
-    }
-
-    public IServiceAdaptor SelectedService
-    {
-        get
-        {
-            return selectedService;
-        }
-
-        set
-        {
-            selectedService = value;
-        }
-    }
-
-    public bool StartRequest()
-    {
-        Api.HttpPostImage();
-        return true;
     }
 
 }
