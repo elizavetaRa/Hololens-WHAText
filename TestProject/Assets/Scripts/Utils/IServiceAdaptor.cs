@@ -7,13 +7,14 @@ using Windows.Globalization;
 
 public interface IServiceAdaptor
 {
-    string ApiKey { get; set; }
-    string Uri { get; set; }
+    string ApiKey { get; }
+    string Uri { get; }
+    OcrResult OcrResult { get; }
 
 #if (!UNITY_EDITOR)
-    Language PreferredLang { get; set; }
+    Language PreferredLang { get; }
 #endif
 
     void HttpPostImage(string url = null, byte[] jsonBytes = null);
-    void ParseResponseData();
+    void ParseResponseData(object response);
 }

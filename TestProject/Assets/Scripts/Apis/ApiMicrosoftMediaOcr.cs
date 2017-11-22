@@ -20,14 +20,10 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 {
 
     public delegate void OnGetDataCompleted(string id, string json);
-
     private static ApiMicrosoftMediaOcr instance = null;
 
 #if (!UNITY_EDITOR)
     private Language preferredLang;
-#endif
-
-#if (!UNITY_EDITOR)
     private IReadOnlyList<Language> AvailableLanguages;
     private SoftwareBitmap bitmap;
 #endif
@@ -75,6 +71,12 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         }
     }
 #endif
+
+    public OcrResult OcrResult
+    {
+        get;
+        private set;
+    }
 
     public string ApiKey
     {
@@ -136,31 +138,77 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     public void HttpPostImage(string url = null, byte[] jsonBytes = null)
     {
 #if (!UNITY_EDITOR)
-            IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
-                async (workItem) =>
-                {
-                    OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
-                    await LoadSampleImage();
+        IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
+            async (workItem) =>
+            {
+                OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
+                await LoadSampleImage();
 
-                    if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
-                    {
-                        Debug.WriteLine("Image Resolution not supported.");
-                    }
-                    else
-                    {
-                        var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
-                        Debug.WriteLine("Resulting Text: " + ocrResult.Text);
-                    }
+                if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
+                {
+                    Debug.WriteLine("Image Resolution not supported.");
                 }
-           );
+                else
+                {
+                    var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
+                    Debug.WriteLine("Resulting Text: " + ocrResult.Text);
+                    ParseResponseData(ocrResult);
+                }
+            }
+        );
  
-           asyncAction.Completed = new AsyncActionCompletedHandler(PostDataAsyncCompleted);
+        asyncAction.Completed = new AsyncActionCompletedHandler(PostDataAsyncCompleted);
 #endif
     }
 
-    public void ParseResponseData()
+    public void ParseResponseData(object response)
     {
-        return;
+#if (!UNITY_EDITOR)
+        Windows.Media.Ocr.OcrResult responseTemp = (Windows.Media.Ocr.OcrResult)response;
+
+        if (responseTemp.Text == "" || responseTemp.Text == null)
+        {
+            Debug.WriteLine("No Text recognized");
+            this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
+        }
+        else
+        {
+            // Find bounding box coords which surround the entire recognized text block
+            float xMin, yMin, xMax, yMax;
+            xMin = yMin = xMax = yMax = 0;
+            float xMinTemp, yMinTemp, xMaxTemp, yMaxTemp;
+
+
+            for (int i = 0; i < responseTemp.Lines.Count; i++)
+            {
+                for (int j = 0; j < responseTemp.Lines[i].Words.Count; j++)
+                {
+                    xMinTemp = (float)responseTemp.Lines[i].Words[j].BoundingRect.X;
+                    yMinTemp = (float)responseTemp.Lines[i].Words[j].BoundingRect.Y;
+                    xMaxTemp = (float)(responseTemp.Lines[i].Words[j].BoundingRect.X + responseTemp.Lines[i].Words[j].BoundingRect.Width);
+                    yMaxTemp = (float)(responseTemp.Lines[i].Words[j].BoundingRect.Y + responseTemp.Lines[i].Words[j].BoundingRect.Height);
+
+                    if (i == 0 && j == 0)
+                    {
+                        xMin = xMinTemp;
+                        xMax = xMaxTemp;
+                        yMin = yMinTemp;
+                        yMax = yMaxTemp;
+                    }
+                    else
+                    {
+                        if (xMinTemp < xMin) xMin = xMinTemp;
+                        if (xMaxTemp > xMax) xMax = xMaxTemp;
+                        if (yMinTemp < yMin) yMin = yMinTemp;
+                        if (yMaxTemp > yMax) yMax = yMaxTemp;
+                    }
+                }
+            }
+
+            this.OcrResult = new OcrResult(responseTemp.Text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
+            Debug.WriteLine("BoundingBox\nxMin:" + this.OcrResult.BoundingBox.x, "\nyMin: " + this.OcrResult.BoundingBox.y + "\nWidth: " + this.OcrResult.BoundingBox.width + "\nHeight: " + this.OcrResult.BoundingBox.height);
+        }
+#endif
     }
 
 
