@@ -51,3 +51,14 @@ public enum OcrService
     MICROSOFTMEDIAOCR,
     GOOGLEVISIONOCR
 }
+
+/// <summary>
+/// Language Identifiers needed for Microsoft.Media.OCR, returning BCP47 normed values
+/// </summary>
+public static class LanguageId
+{
+    public static string DE { get { return "de"; } }
+    public static string EN { get { return "en"; } }
+    public static string ES { get { return "es"; } }
+    public static string ZH { get { return "zh"; } }
+}

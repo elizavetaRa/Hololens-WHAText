@@ -35,7 +35,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     private ApiMicrosoftMediaOcr(string preferredLang)
     {
 #if (!UNITY_EDITOR)
-        Debug.WriteLine(OcrEngine.AvailableRecognizerLanguages);
+        // If preferred language does not exist, use the first one which is available by default
         CheckForAvailableLanguages();
         this.preferredLang = new Language(preferredLang);
 
@@ -43,9 +43,9 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         {
             PreferredLang = AvailableLanguages[0];
         }
-#endif
 
-        Debug.WriteLine("Api created.");
+        Debug.WriteLine("Api created with Language " + PreferredLang.DisplayName);
+#endif
     }
 
     public static ApiMicrosoftMediaOcr Instance
@@ -54,7 +54,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         {
             if (instance == null)
             {
-                instance = new ApiMicrosoftMediaOcr("en-US");
+                instance = new ApiMicrosoftMediaOcr(LanguageId.DE);
             }
 
             return instance;
@@ -110,6 +110,10 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     {
         if (OcrEngine.AvailableRecognizerLanguages.Count > 0)
         {
+            for (var i = 0; i < OcrEngine.AvailableRecognizerLanguages.Count; i++)
+            {
+                Debug.WriteLine("Supported: " + OcrEngine.AvailableRecognizerLanguages[i].DisplayName);
+            }
             this.AvailableLanguages = OcrEngine.AvailableRecognizerLanguages;
         }
         else
@@ -145,10 +149,8 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
                     else
                     {
                         var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
-                        Debug.WriteLine(ocrResult.Text);
+                        Debug.WriteLine("Resulting Text: " + ocrResult.Text);
                     }
-    
-
                 }
            );
  
@@ -156,58 +158,22 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 #endif
     }
 
-    public void GetDataAsync(string url, string id, OnGetDataCompleted handler)
-    {
-#if (!UNITY_EDITOR)
-            IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
-                async (workItem) =>
-                {
-                    try
-                    {
-                        WebRequest webRequest = WebRequest.Create(url);
-                        webRequest.Method = "GET";
-                        webRequest.Headers["Content-Type"] = "application/json";
- 
-                        WebResponse response = await webRequest.GetResponseAsync();
- 
-                        Stream result = response.GetResponseStream();
-                        StreamReader reader = new StreamReader(result);
- 
-                        string json = reader.ReadToEnd();
- 
-                        handler(id, json);
-                    }
-                    catch (Exception)
-                    {
-                        // handle errors
-                    }
-                }
-            );
-
-            asyncAction.Completed = new AsyncActionCompletedHandler(GetDataAsyncCompleted);
- 
-#endif
-    }
-
     public void ParseResponseData()
     {
-        throw new NotImplementedException();
+        return;
     }
 
 
 #if (!UNITY_EDITOR)
         private void PostDataAsyncCompleted(IAsyncAction asyncInfo, AsyncStatus asyncStatus)
         {
-            
-        }
-
-        private void GetDataAsyncCompleted(IAsyncAction asyncInfo, AsyncStatus asyncStatus)
-        {
-
+#if (!UNITY_EDITOR)
+            Debug.WriteLine("OCR has finished.\nStatus: " + asyncStatus + "\nInfo: " + asyncInfo);
+#endif
         }
 
         /// <summary>
-        /// Loads image from file to bitmap and displays it in UI.
+        /// Loads image from file and copies it back to UI thread
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
@@ -217,71 +183,19 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             {
                 var decoder = await BitmapDecoder.CreateAsync(stream);
 
-                bitmap = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+                var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
 
-                var imgSource = new WriteableBitmap(bitmap.PixelWidth, bitmap.PixelHeight);
-                bitmap.CopyToBuffer(imgSource.PixelBuffer);
+
+                bitmap = bitmapTemp;
             }
         }
 
         private async Task LoadSampleImage()
         {
-        System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
-        var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
-        await LoadImage(file);
+            System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
+            var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
+            await LoadImage(file);
         }
 
 #endif
-}
-
-/// <summary>
-/// holds loaded image event parameters
-/// </summary>
-public class LoadedImageEventArgs : EventArgs
-{
-    /// <summary>
-    /// constructor for loaded image event parameters
-    /// </summary>
-    /// <param name="queryId"> the ID of the query the image was loaded for </param>
-    /// <param name="keyword"> the keyword the image was loaded for </param>
-    /// <param name="imageId"> the ID of the loaded image </param>
-    public LoadedImageEventArgs(string queryId, string keyword, string imageId)
-    {
-        this.keyword = keyword;
-        this.queryId = queryId;
-        this.imageId = imageId;
-    }
-    /// <summary>
-    /// the ID of the loaded image
-    /// </summary>
-    private string imageId;
-    /// <summary>
-    /// the keyword the image was loaded for
-    /// </summary>
-    private string keyword;
-    /// <summary>
-    /// the ID of the query the image was loaded for
-    /// </summary>
-    private string queryId;
-    /// <summary>
-    /// the ID of the query the image was loaded for
-    /// </summary>
-    public string QueryId
-    {
-        get { return queryId; }
-    }
-    /// <summary>
-    /// the keyword the image was loaded for
-    /// </summary>
-    public string Keyword
-    {
-        get { return keyword; }
-    }
-    /// <summary>
-    /// the ID of the loaded image
-    /// </summary>
-    public string ImageId
-    {
-        get { return imageId; }
-    }
 }
