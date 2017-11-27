@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 #if (!UNITY_EDITOR)
+using System.Threading.Tasks;
 using Windows.Globalization;
 #endif
 
@@ -13,8 +14,9 @@ public interface IServiceAdaptor
 
 #if (!UNITY_EDITOR)
     Language PreferredLang { get; }
+
+    Task<OcrResult> HttpPostImage(string url = null, byte[] jsonBytes = null);
 #endif
 
-    void HttpPostImage(string url = null, byte[] jsonBytes = null);
     void ParseResponseData(object response);
 }

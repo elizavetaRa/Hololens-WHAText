@@ -1,8 +1,10 @@
 ﻿
 using HoloToolkit.Unity;
 using UnityEngine;
+using System;
 #if (!UNITY_EDITOR)
 using Windows.Media.Ocr;
+using System.Threading.Tasks;
 #endif
 
 public class ApiManager : Singleton<ApiManager>
@@ -10,17 +12,19 @@ public class ApiManager : Singleton<ApiManager>
 
     private IServiceAdaptor Api;
     public OcrService SelectedService = OcrService.MICROSOFTMEDIAOCR;
+    // Maximum Request Executions When Errors Occur
+    private int maxRequests = 3;
 
     protected void Start()
     {
         Debug.Log("Selected Service:" + SelectedService);
 #if (!UNITY_EDITOR)
         System.Diagnostics.Debug.WriteLine("Selected Service:" + SelectedService);
-#endif
         if (InitSelectedService())
         {
-            Api.HttpPostImage();
+            var result = Task.Run(() => Api.HttpPostImage());
         }
+#endif
     }
 
     /// <summary>

@@ -1,16 +1,12 @@
-﻿using System;
+﻿#if (!UNITY_EDITOR)
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
-using System.IO;
-#if (!UNITY_EDITOR)
 using System.Threading.Tasks;
 using Windows.Globalization;
 using Windows.Media.Ocr;
-using Windows.Foundation;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
-using Windows.UI.Xaml.Media.Imaging;
 #endif
 
 /// <summary>
@@ -65,7 +61,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             return preferredLang;
         }
 
-        set 
+        set
         {
             preferredLang = value;
         }
@@ -133,11 +129,12 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         }
         return true;
     }
-#endif
 
+    /*
     public void HttpPostImage(string url = null, byte[] jsonBytes = null)
     {
 #if (!UNITY_EDITOR)
+        Debug.WriteLine("Ocr started");
         IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
             async (workItem) =>
             {
@@ -151,15 +148,45 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
                 else
                 {
                     var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
-                    Debug.WriteLine("Resulting Text: " + ocrResult.Text);
                     ParseResponseData(ocrResult);
                 }
             }
         );
  
-        asyncAction.Completed = new AsyncActionCompletedHandler(PostDataAsyncCompleted);
+        asyncAction.Completed = new AsyncActionCompletedHandler(
+            (IAsyncAction asyncInfo, AsyncStatus asyncStatus) =>
+            {
+                CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
+                    CoreDispatcherPriority.High,
+                    new DispatchedHandler(() =>
+                    {
+                        Debug.WriteLine(this.OcrResult);
+                    })
+                );
+            }
+        );
 #endif
     }
+    */
+
+    public async Task<OcrResult> HttpPostImage(string url = null, byte[] jsonBytes = null)
+    {
+        OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
+        await LoadSampleImage();
+
+        if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
+        {
+            Debug.WriteLine("Image Resolution not supported.");
+        }
+        else
+        {
+            var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
+            ParseResponseData(ocrResult);
+        }
+        Debug.WriteLine("OCR finished");
+        return OcrResult;
+    }
+#endif
 
     public void ParseResponseData(object response)
     {
@@ -206,44 +233,33 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             }
 
             this.OcrResult = new OcrResult(responseTemp.Text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
-            Debug.WriteLine("BoundingBox\nxMin:" + this.OcrResult.BoundingBox.x, "\nyMin: " + this.OcrResult.BoundingBox.y + "\nWidth: " + this.OcrResult.BoundingBox.width + "\nHeight: " + this.OcrResult.BoundingBox.height);
         }
 #endif
     }
 
 
 #if (!UNITY_EDITOR)
-        private void PostDataAsyncCompleted(IAsyncAction asyncInfo, AsyncStatus asyncStatus)
+    /// <summary>
+    /// Loads image from file and copies it back to UI thread
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
+    private async Task LoadImage(StorageFile file)
+    {
+        using (var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read))
         {
-#if (!UNITY_EDITOR)
-            Debug.WriteLine("OCR has finished.\nStatus: " + asyncStatus + "\nInfo: " + asyncInfo);
-#endif
+            var decoder = await BitmapDecoder.CreateAsync(stream);
+            var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+            bitmap = bitmapTemp;
         }
+    }
 
-        /// <summary>
-        /// Loads image from file and copies it back to UI thread
-        /// </summary>
-        /// <param name="file"></param>
-        /// <returns></returns>
-        private async Task LoadImage(StorageFile file)
-        {
-            using (var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read))
-            {
-                var decoder = await BitmapDecoder.CreateAsync(stream);
-
-                var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-
-
-                bitmap = bitmapTemp;
-            }
-        }
-
-        private async Task LoadSampleImage()
-        {
-            System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
-            var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
-            await LoadImage(file);
-        }
+    private async Task LoadSampleImage()
+    {
+        System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
+        var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
+        await LoadImage(file);
+    }
 
 #endif
 }
