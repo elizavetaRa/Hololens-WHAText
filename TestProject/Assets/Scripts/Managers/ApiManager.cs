@@ -1,8 +1,10 @@
 ﻿
 using HoloToolkit.Unity;
 using UnityEngine;
+using System;
 #if (!UNITY_EDITOR)
 using Windows.Media.Ocr;
+using System.Threading.Tasks;
 #endif
 
 public class ApiManager : Singleton<ApiManager>
@@ -10,6 +12,8 @@ public class ApiManager : Singleton<ApiManager>
 
     private IServiceAdaptor Api;
     public OcrService SelectedService = OcrService.MICROSOFTMEDIAOCR;
+    // Maximum Request Executions When Errors Occur
+    private int maxRequests = 3;
 
     protected void Start()
     {
@@ -19,7 +23,7 @@ public class ApiManager : Singleton<ApiManager>
 #endif
         if (InitSelectedService())
         {
-            Api.HttpPostImage();
+            var result = Task.Run(() => Api.HttpPostImage());
         }
     }
 
@@ -30,11 +34,9 @@ public class ApiManager : Singleton<ApiManager>
     {
         switch (SelectedService)
         {
-            case OcrService.GOOGLEVISIONOCR:
-#if (!UNITY_EDITOR)
-                System.Diagnostics.Debug.WriteLine("Service not supported at the moment.");
-#endif
-                return false;
+            case OcrService.MICROSOFTAZUREOCR:
+                Api = ApiMicrosoftAzureOcr.Instance;
+                return true;
             case OcrService.MICROSOFTMEDIAOCR:
                 Api = ApiMicrosoftMediaOcr.Instance;
                 return true;
@@ -49,7 +51,7 @@ public class ApiManager : Singleton<ApiManager>
 public enum OcrService
 {
     MICROSOFTMEDIAOCR,
-    GOOGLEVISIONOCR
+    MICROSOFTAZUREOCR
 }
 
 /// <summary>
