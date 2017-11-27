@@ -30,11 +30,9 @@ public class ApiManager : Singleton<ApiManager>
     {
         switch (SelectedService)
         {
-            case OcrService.GOOGLEVISIONOCR:
-#if (!UNITY_EDITOR)
-                System.Diagnostics.Debug.WriteLine("Service not supported at the moment.");
-#endif
-                return false;
+            case OcrService.MICROSOFTAZUREOCR:
+                Api = ApiMicrosoftAzureOcr.Instance;
+                return true;
             case OcrService.MICROSOFTMEDIAOCR:
                 Api = ApiMicrosoftMediaOcr.Instance;
                 return true;
@@ -49,7 +47,7 @@ public class ApiManager : Singleton<ApiManager>
 public enum OcrService
 {
     MICROSOFTMEDIAOCR,
-    GOOGLEVISIONOCR
+    MICROSOFTAZUREOCR
 }
 
 /// <summary>
