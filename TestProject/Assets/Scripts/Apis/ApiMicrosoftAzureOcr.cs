@@ -1,6 +1,5 @@
 ﻿#if (!UNITY_EDITOR)
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
@@ -8,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Foundation;
 using Windows.Globalization;
 #else
 using UnityEngine;
@@ -20,14 +18,19 @@ using UnityEngine;
 public class ApiMicrosoftAzureOcr : IServiceAdaptor
 {
     public delegate void OnGetDataCompleted(string id, string json);
-
     private static ApiMicrosoftAzureOcr instance = null;
-
     private string uri = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
+    public string apiKey = "0aecf5424f47414caabcf34def172d60";
+    // Number of Maximum Requests Until Fallback to Media.OCR 
+    private int maxTries = 3;
+    // Delay Time Between Request Sendings in ms
+    private int delay = 200;
 
     private ApiMicrosoftAzureOcr(string ApiKey)
     {
-        this.ApiKey = ApiKey;
+        if (ApiKey != "" && ApiKey != null)
+            this.ApiKey = ApiKey;
+        this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
     }
 
     public static ApiMicrosoftAzureOcr Instance
@@ -36,7 +39,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         {
             if (instance == null)
             {
-                instance = new ApiMicrosoftAzureOcr("0aecf5424f47414caabcf34def172d60");
+                instance = new ApiMicrosoftAzureOcr("");
             }
 
             return instance;
@@ -45,8 +48,14 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 
     public string ApiKey
     {
-        get;
-        set;
+        get
+        {
+            return this.apiKey;
+        }
+        set
+        {
+            this.apiKey = value;
+        }
     }
 
     public string Uri
@@ -93,25 +102,36 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
             // Using octet-stream for local image location
             content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-            try
+            // execute request maxTries times until fallback to Media.OCR is used
+            int count = 0;
+            
+            while (count < maxTries)
             {
-                // Execute the REST API call.
-                response = await client.PostAsync(uri, content);
+                try
+                {
+                    System.Diagnostics.Debug.WriteLine("Try Nr " + count);
 
-                // Get the JSON response.
-                string contentString = await response.Content.ReadAsStringAsync();
+                    // Execute the REST API call.
+                    response = await client.PostAsync(uri, content);
 
-                // Display the JSON response.
-                System.Diagnostics.Debug.WriteLine("\nResponse:\n");
-                System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
+                    // Get the JSON response.
+                    string contentString = await response.Content.ReadAsStringAsync();
 
-                ParseResponseData(contentString);
-                System.Diagnostics.Debug.WriteLine(OcrResult);
-            }
+                    // Display the JSON response.
+                    System.Diagnostics.Debug.WriteLine("\nResponse:\n");
+                    System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
 
-            catch (Exception e)
-            {
-                System.Diagnostics.Debug.WriteLine("Api Request Error: " + e);
+                    ParseResponseData(contentString);
+                    System.Diagnostics.Debug.WriteLine(OcrResult);
+                    break;
+                }
+
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Api Request Error: " + e);
+                    await Task.Delay(delay);
+                    count++;
+                }
             }
         }
 
@@ -207,7 +227,6 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         if ((string)response == "" || response == null)
         {
             System.Diagnostics.Debug.WriteLine("No Text recognized");
-            this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
         }
         else
         {

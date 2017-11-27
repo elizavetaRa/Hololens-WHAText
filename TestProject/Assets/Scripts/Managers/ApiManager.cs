@@ -12,8 +12,6 @@ public class ApiManager : Singleton<ApiManager>
 
     private IServiceAdaptor Api;
     public OcrService SelectedService = OcrService.MICROSOFTMEDIAOCR;
-    // Maximum Request Executions When Errors Occur
-    private int maxRequests = 3;
 
     protected void Start()
     {
