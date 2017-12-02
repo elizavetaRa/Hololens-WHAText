@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Globalization;
 #else
@@ -30,6 +31,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
     {
         if (ApiKey != "" && ApiKey != null)
             this.ApiKey = ApiKey;
+
         this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
     }
 
