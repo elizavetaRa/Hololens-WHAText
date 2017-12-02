@@ -44,6 +44,33 @@ public class ApiManager : Singleton<ApiManager>
         }
     }
 
+    public byte[] Screenshot {
+
+        get; set;
+
+    }
+
+    internal void AnalyzeImage(RequestType requestType, byte[] screenshot)
+    {
+        // get correct ocr api instance depending on request type
+        switch (requestType)
+        {
+            case RequestType.REMOTE:
+                Api = ApiMicrosoftAzureOcr.Instance;
+                break;
+            case RequestType.LOCAL:
+            default:
+                Api = ApiMicrosoftMediaOcr.Instance;
+                break;
+        }
+
+        Screenshot = screenshot;
+
+#if (!UNITY_EDITOR)
+        var result = Task.Run(() => Api.HttpPostImage(Screenshot));
+#endif
+
+    }
 }
 
 public enum OcrService
@@ -61,4 +88,13 @@ public static class LanguageId
     public static string EN { get { return "en"; } }
     public static string ES { get { return "es"; } }
     public static string ZH { get { return "zh"; } }
+}
+
+/// <summary>
+/// Defines whether request was destined for local or remote OCR
+/// </summary>
+public enum RequestType
+{
+    LOCAL,
+    REMOTE
 }

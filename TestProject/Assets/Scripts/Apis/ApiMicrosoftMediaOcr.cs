@@ -7,6 +7,9 @@ using Windows.Globalization;
 using Windows.Media.Ocr;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
+using System.IO;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 #endif
 
 /// <summary>
@@ -169,10 +172,14 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     }
     */
 
-    public async Task<OcrResult> HttpPostImage(string url = null, byte[] jsonBytes = null)
+    public async Task<OcrResult> HttpPostImage(byte[] screenshot = null)
     {
         OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
-        await LoadSampleImage();
+
+        if (screenshot == null)
+            await LoadSampleImageFromFile();
+        else
+            await LoadImageFromMem(screenshot);
 
         if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
         {
@@ -239,12 +246,33 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
 
 #if (!UNITY_EDITOR)
+
+    /// <summary>
+    /// Loads image from memory and copies it back to UI thread
+    /// </summary>
+    /// <param name="image"></param>
+    /// <returns></returns>
+    private async Task LoadImageFromMem(byte[] image)
+    {
+        using (InMemoryRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream())
+        {
+            // write image to memory stream
+            await randomAccessStream.WriteAsync(image.AsBuffer());
+
+            // instantiate decoder for creation of SoftwareBitmap needed by local OCR
+            var decoder = await BitmapDecoder.CreateAsync(randomAccessStream);
+
+            var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
+            bitmap = bitmapTemp;
+        }
+    }
+
     /// <summary>
     /// Loads image from file and copies it back to UI thread
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
-    private async Task LoadImage(StorageFile file)
+    private async Task LoadImageFromFile(StorageFile file)
     {
         using (var stream = await file.OpenAsync(Windows.Storage.FileAccessMode.Read))
         {
@@ -254,11 +282,11 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         }
     }
 
-    private async Task LoadSampleImage()
+    private async Task LoadSampleImageFromFile()
     {
         System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
         var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
-        await LoadImage(file);
+        await LoadImageFromFile(file);
     }
 
 #endif

@@ -1,9 +1,7 @@
 using UnityEngine;
 using HoloToolkit.Unity;
-using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Collections;
 using System.Linq;
 using UnityEngine.VR.WSA.WebCam;
 
@@ -66,9 +64,6 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 
             // Convert to Byte List
             photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);
-
-
-            //send to OCR!!! 
 
             // send event with Bytelist of the captured screenshot
             OnScreenshotTaken(new QueryPhotoEventArgs(imageBufferList));

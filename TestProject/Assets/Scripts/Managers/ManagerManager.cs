@@ -39,18 +39,11 @@ public class ManagerManager : Singleton<ManagerManager>
     /// <param name="e"> the photograph event parameters </param>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
-        // create a new picture object and store the photograph
-
-        List<byte> list = new List<byte>();
-
-        //store byte list of the captured screenshot
-        list = e.ScreenshotByteList;
-
+        // store new screenshot as byte array
+        byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
 
         // initiate text regognition
-        // apiManager.AnalyzeImage(e.QueryId, image.Id);
-
-
+        apiManager.AnalyzeImage(RequestType.LOCAL, screenshotAsByteArray);
     }
 
 

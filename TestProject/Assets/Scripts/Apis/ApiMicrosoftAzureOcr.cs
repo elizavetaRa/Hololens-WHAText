@@ -76,7 +76,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 #endif
 
 #if (!UNITY_EDITOR)
-    public async Task<OcrResult> HttpPostImage(string url = null, byte[] jsonBytes = null)
+    public async Task<OcrResult> HttpPostImage(byte[] jsonBytes = null)
     {
         HttpClient client = new HttpClient();
         // Set Api keys
