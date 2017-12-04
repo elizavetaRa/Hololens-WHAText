@@ -1,4 +1,7 @@
 using HoloToolkit.Unity;
+#if (!UNITY_EDITOR)
+using System.Threading.Tasks;
+#endif
 
 /// <summary> Singleton that is responsible for management of queries, pictures and keywords </summary>
 public class Controller : Singleton<Controller>
@@ -27,8 +30,11 @@ public class Controller : Singleton<Controller>
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+        apiManager.ImageAnalysed += onImageAnalysed;
 
+#if (!UNITY_EDITOR)
         screenshotManager.TakeScreenshot();
+#endif
     }
 
 
@@ -39,11 +45,14 @@ public class Controller : Singleton<Controller>
     /// <param name="e"> the photograph event parameters </param>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
-        // store new screenshot as byte array
-        //byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
-
         // initiate text regognition
-        apiManager.AnalyzeImage(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
+        apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
+    }
+
+    private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
+    {
+        if (e.Result == null)
+            System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
     }
 
 

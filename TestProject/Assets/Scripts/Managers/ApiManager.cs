@@ -2,6 +2,7 @@
 using HoloToolkit.Unity;
 using UnityEngine;
 using System;
+using System.Net.Http;
 #if (!UNITY_EDITOR)
 using Windows.Media.Ocr;
 using System.Threading.Tasks;
@@ -11,7 +12,11 @@ public class ApiManager : Singleton<ApiManager>
 {
 
     private IServiceAdaptor Api;
+    private OcrResult result;
     public OcrService SelectedService = OcrService.MICROSOFTMEDIAOCR;
+
+    /// <summary> handles the event when an image was analysed
+    public event EventHandler<AnalyseImageEventArgs> ImageAnalysed;
 
     protected void Start()
     {
@@ -43,7 +48,18 @@ public class ApiManager : Singleton<ApiManager>
 
     }
 
-    internal void AnalyzeImage(RequestType requestType, Picture screenshot)
+    /// <summary>
+    /// called whenever an image was analysed
+    /// </summary>
+    /// <param name="e"></param>
+    protected virtual void OnImageAnalysed(AnalyseImageEventArgs e)
+    {
+        // send event if there are subscribers
+        EventHandler<AnalyseImageEventArgs> handler = ImageAnalysed;
+        if (handler != null) handler(this, e);
+    }
+
+    public async Task AnalyzeImageAsync(RequestType requestType, Picture screenshot)
     {
         // get correct ocr api instance depending on request type
         switch (requestType)
@@ -60,10 +76,35 @@ public class ApiManager : Singleton<ApiManager>
         Screenshot = screenshot;
 
 #if (!UNITY_EDITOR)
-        var result = Task.Run(() => Api.HttpPostImage(Screenshot));
+        try
+        {
+            result = await Api.HttpPostImage(Screenshot);
+        }
+        catch (HttpRequestException e)
+        {
+            Api = ApiMicrosoftMediaOcr.Instance;
+            result = await Api.HttpPostImage(Screenshot);
+        }
 #endif
 
+        OnImageAnalysed(new AnalyseImageEventArgs(result));
+
     }
+}
+
+public class AnalyseImageEventArgs : EventArgs
+{
+
+    public AnalyseImageEventArgs(OcrResult result)
+    {
+        Result = result;
+    }
+
+    public OcrResult Result
+    {
+        get; 
+    }
+
 }
 
 public enum OcrService
