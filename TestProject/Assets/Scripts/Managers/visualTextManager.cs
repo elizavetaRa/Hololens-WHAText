@@ -7,9 +7,10 @@ using System;
 public class visualTextManager : Singleton<visualTextManager> {
     public string dummy = "was?";
     public GameObject textArea;
+    public GameObject OcrResult;
 	// Use this for initialization
 	void Start () {
-        visualizeText(dummy);
+        //visualizeText(dummy);
 	}
 
     private void visualizeText(string dummyText)

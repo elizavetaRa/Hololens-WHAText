@@ -135,7 +135,7 @@ namespace HoloToolkit.Unity
                 SpatialUnderstandingDll.Imports.SpatialUnderstanding_Init();
             }
         }
-
+        
         private void Update()
         {
             if (!AllowSpatialUnderstanding)
@@ -153,6 +153,8 @@ namespace HoloToolkit.Unity
                 Update_Scan(timeSinceLastUpdate);
                 timeSinceLastUpdate = 0;
             }
+
+    
         }
 
         protected override void OnDestroy()
