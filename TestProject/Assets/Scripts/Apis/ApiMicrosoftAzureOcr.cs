@@ -101,7 +101,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         if (screenshot == null)
             byteData = await GetImageAsByteArray("Assets\\Schriftarten.PNG");
         else
-            byteData = screenshot.AsByteArray;
+            byteData = screenshot.AsJPEG;
 
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
@@ -140,7 +140,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                 }
             }
         }
-
+        System.Diagnostics.Debug.WriteLine("OCR finished");
         return OcrResult;
     }
 

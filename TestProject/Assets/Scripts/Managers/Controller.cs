@@ -40,10 +40,10 @@ public class Controller : Singleton<Controller>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
         // store new screenshot as byte array
-        byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
+        //byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
 
         // initiate text regognition
-        apiManager.AnalyzeImage(RequestType.REMOTE, new Picture(screenshotAsByteArray));
+        apiManager.AnalyzeImage(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
     }
 
 

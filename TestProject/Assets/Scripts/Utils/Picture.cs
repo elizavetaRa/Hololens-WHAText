@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
 #endif
+using System;
+using UnityEngine;
 
 /// <summary>
 /// Represents Image which gets processed by OCR
@@ -14,12 +16,18 @@ public class Picture
     private SoftwareBitmap pictureAsSoftwareBitmap;
 #endif
 
-    public Picture(byte[] image)
+    public Picture(Texture2D image)
     {
-        AsByteArray = image;
+        AsTexture2D = image;
+        AsJPEG = image.EncodeToJPG();
     }
 
-    public byte[] AsByteArray
+    public Texture2D AsTexture2D
+    {
+        get; set;
+    }
+
+    public byte[] AsJPEG
     {
         get; set;
     }
@@ -28,13 +36,8 @@ public class Picture
     public async Task<SoftwareBitmap> AsSoftwareBitmap()
     {
         if (this.pictureAsSoftwareBitmap == null)
-            await LoadImageFromMem(AsByteArray);
+            await LoadImageFromMem(AsJPEG);
         return this.pictureAsSoftwareBitmap;
-    }
-
-    public async Task<Bitmap> AsBitmap()
-    {
-
     }
 
     /// <summary>

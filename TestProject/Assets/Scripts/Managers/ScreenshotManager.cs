@@ -13,7 +13,8 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 	
 	 /// <summary> object that performs the photo capture </summary>
 	PhotoCapture photoCaptureObject = null;
-	
+
+    Resolution cameraResolution;
 	
 	Texture2D targetTexture = null;
     Renderer quadRenderer = null;
@@ -31,7 +32,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 
     public void TakeScreenshot() {
         //First: Last: worst resolution?
-        Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+        cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
@@ -64,13 +65,18 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             // play photo capture sound
             //Camera.main.GetComponent<AudioSource>().Play();
 
-            List<byte> imageBufferList = new List<byte>();
+            // save photograph to texture
+            Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
+            photoCaptureFrame.UploadImageDataToTexture(screenshot);
+            
+            
+            /*List<byte> imageBufferList = new List<byte>();
 
             // Convert to Byte List
-            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);
+            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
 
             // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(imageBufferList));
+            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot));
             
         }
 
@@ -111,23 +117,23 @@ public class QueryPhotoEventArgs : EventArgs
     /// constructor for the photo capture event parameters
     /// </summary>
     /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(List<byte> l)
+    public QueryPhotoEventArgs(Texture2D texture)
     {
-        byteList = l;
+        ScreenshotAsTexture = texture;
     }
 
 
     /// <summary>
     /// Bytelist of the captured screenshot
     /// </summary>
-    private List<byte> byteList;
+    private Texture2D screenshot;
 
 
     /// <summary>
     /// Bytelist of the captured screenshot
     /// </summary>
-    public List<byte> ScreenshotByteList
+    public Texture2D ScreenshotAsTexture
     {
-        get { return byteList; }
+        get; private set;
     }
 }
