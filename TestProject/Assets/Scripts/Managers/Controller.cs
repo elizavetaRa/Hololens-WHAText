@@ -26,7 +26,9 @@ public class Controller : Singleton<Controller>
         screenshotManager = ScreenshotManager.Instance;
 
         // subscribe to events
-        //screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+        screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+
+        screenshotManager.TakeScreenshot();
     }
 
 
@@ -41,7 +43,7 @@ public class Controller : Singleton<Controller>
         byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
 
         // initiate text regognition
-        apiManager.AnalyzeImage(RequestType.LOCAL, new Picture(screenshotAsByteArray));
+        apiManager.AnalyzeImage(RequestType.REMOTE, new Picture(screenshotAsByteArray));
     }
 
 

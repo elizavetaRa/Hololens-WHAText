@@ -15,14 +15,7 @@ public class ApiManager : Singleton<ApiManager>
 
     protected void Start()
     {
-        Debug.Log("Selected Service:" + SelectedService);
-#if (!UNITY_EDITOR)
-        System.Diagnostics.Debug.WriteLine("Selected Service:" + SelectedService);
-        if (InitSelectedService())
-        {
-            var result = Task.Run(() => Api.HttpPostImage());
-        }
-#endif
+        //InitSelectedService();
     }
 
     /// <summary>

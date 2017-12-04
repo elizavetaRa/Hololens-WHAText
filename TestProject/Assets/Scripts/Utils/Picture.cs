@@ -1,7 +1,6 @@
 ﻿#if (!UNITY_EDITOR)
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using System;
 using Windows.Storage.Streams;
 using Windows.Graphics.Imaging;
 #endif
@@ -31,6 +30,11 @@ public class Picture
         if (this.pictureAsSoftwareBitmap == null)
             await LoadImageFromMem(AsByteArray);
         return this.pictureAsSoftwareBitmap;
+    }
+
+    public async Task<Bitmap> AsBitmap()
+    {
+
     }
 
     /// <summary>

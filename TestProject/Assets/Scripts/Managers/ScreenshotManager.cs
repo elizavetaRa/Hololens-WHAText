@@ -26,12 +26,16 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     // Use this for initialization
     void Start()
     {
-		//First: Last: worst resolution?
+
+    }
+
+    public void TakeScreenshot() {
+        //First: Last: worst resolution?
         Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
-		//Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
         PhotoCapture.CreateAsync(false, delegate(PhotoCapture captureObject) {
                 photoCaptureObject = captureObject;
 				
