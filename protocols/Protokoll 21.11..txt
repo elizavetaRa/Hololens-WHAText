@@ -1,0 +1,30 @@
+Protokoll Treffen 21.11.
+
+Punkte: 
+Was haben wir?
+- Durchsprechen des Konzepts
+	Userschritte: 
+		Texte Suchen(eigenes Konzept wurde akzeptiert)
+		Anfrage Formulieren (Annahme: relativ wenig text, einzelne labels + suchmaschinen filtern stoppwörter meist raus)
+		Ergebnisse
+	- Interaktion mit "HUD"-Fenstern: folgt einem nur, wenn es das Blickfeld verlassen würde
+	- Pflicht: API leicht auswechselbar, Grundgerüst
+	- kommt gut an: Suchmaschine auswechselbar
+	- Verschiedene Szenarien umfassen/beachten? nein
+	- "Schritte zeigen" - Endnutzer weiß normalerweise in welchem Schritt er ist
+	- ROIs wählen: optional
+	- Ergebnisdarstellung: Pflicht: sehen der Ergebnisse
+				- interaktionsmöglichkeiten mit der Liste optional
+				- Interaktion mit Ergebnis: Detailansicht(statisch erstmal)
+- Implementierung:
+	- Request an API geschrieben
+	- implementieren des Media OCR und ab jetzt testen
+	
+
+Zwischenpräsentation
+- api-tests (kurz)
+- fortschritte seit kick off (API request,...)
+- generelle Konzepte vorstellen (möglicherweise in Diagrammform)
+- nächste Arbeitspakete/Schritte
+- 5 Minuten 
+- Mögliche alternative konzepte zu verschiedenen Anwendungsszenarien

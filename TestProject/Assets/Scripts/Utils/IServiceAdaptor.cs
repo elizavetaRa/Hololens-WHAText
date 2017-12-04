@@ -15,7 +15,7 @@ public interface IServiceAdaptor
 #if (!UNITY_EDITOR)
     Language PreferredLang { get; }
 
-    Task<OcrResult> HttpPostImage(string url = null, byte[] jsonBytes = null);
+    Task<OcrResult> HttpPostImage(byte[] jsonBytes = null);
 #endif
 
     void ParseResponseData(object response);
