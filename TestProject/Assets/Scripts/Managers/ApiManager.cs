@@ -44,13 +44,13 @@ public class ApiManager : Singleton<ApiManager>
         }
     }
 
-    public byte[] Screenshot {
+    public Picture Screenshot {
 
         get; set;
 
     }
 
-    internal void AnalyzeImage(RequestType requestType, byte[] screenshot)
+    internal void AnalyzeImage(RequestType requestType, Picture screenshot)
     {
         // get correct ocr api instance depending on request type
         switch (requestType)

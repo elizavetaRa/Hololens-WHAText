@@ -133,53 +133,14 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         return true;
     }
 
-    /*
-    public void HttpPostImage(string url = null, byte[] jsonBytes = null)
-    {
-#if (!UNITY_EDITOR)
-        Debug.WriteLine("Ocr started");
-        IAsyncAction asyncAction = Windows.System.Threading.ThreadPool.RunAsync(
-            async (workItem) =>
-            {
-                OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
-                await LoadSampleImage();
-
-                if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
-                {
-                    Debug.WriteLine("Image Resolution not supported.");
-                }
-                else
-                {
-                    var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
-                    ParseResponseData(ocrResult);
-                }
-            }
-        );
- 
-        asyncAction.Completed = new AsyncActionCompletedHandler(
-            (IAsyncAction asyncInfo, AsyncStatus asyncStatus) =>
-            {
-                CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(
-                    CoreDispatcherPriority.High,
-                    new DispatchedHandler(() =>
-                    {
-                        Debug.WriteLine(this.OcrResult);
-                    })
-                );
-            }
-        );
-#endif
-    }
-    */
-
-    public async Task<OcrResult> HttpPostImage(byte[] screenshot = null)
+    public async Task<OcrResult> HttpPostImage(Picture screenshot = null)
     {
         OcrEngine ocrEngine = OcrEngine.TryCreateFromLanguage(PreferredLang);
 
         if (screenshot == null)
             await LoadSampleImageFromFile();
         else
-            await LoadImageFromMem(screenshot);
+            await screenshot.AsSoftwareBitmap();
 
         if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
         {
@@ -246,27 +207,6 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
 
 #if (!UNITY_EDITOR)
-
-    /// <summary>
-    /// Loads image from memory and copies it back to UI thread
-    /// </summary>
-    /// <param name="image"></param>
-    /// <returns></returns>
-    private async Task LoadImageFromMem(byte[] image)
-    {
-        using (InMemoryRandomAccessStream randomAccessStream = new InMemoryRandomAccessStream())
-        {
-            // write image to memory stream
-            await randomAccessStream.WriteAsync(image.AsBuffer());
-
-            // instantiate decoder for creation of SoftwareBitmap needed by local OCR
-            var decoder = await BitmapDecoder.CreateAsync(randomAccessStream);
-
-            var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-            bitmap = bitmapTemp;
-        }
-    }
-
     /// <summary>
     /// Loads image from file and copies it back to UI thread
     /// </summary>

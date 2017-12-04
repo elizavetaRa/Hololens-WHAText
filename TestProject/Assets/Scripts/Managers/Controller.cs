@@ -41,7 +41,7 @@ public class Controller : Singleton<Controller>
         byte[] screenshotAsByteArray = e.ScreenshotByteList.ToArray();
 
         // initiate text regognition
-        apiManager.AnalyzeImage(RequestType.LOCAL, screenshotAsByteArray);
+        apiManager.AnalyzeImage(RequestType.LOCAL, new Picture(screenshotAsByteArray));
     }
 
 

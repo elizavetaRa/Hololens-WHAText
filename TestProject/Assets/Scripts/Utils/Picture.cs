@@ -1,20 +1,22 @@
 ﻿#if (!UNITY_EDITOR)
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using System.IO;
+using System;
 using Windows.Storage.Streams;
-#endif
 using Windows.Graphics.Imaging;
+#endif
 
 /// <summary>
 /// Represents Image which gets processed by OCR
 /// </summary>
 public class Picture
 {
+#if (!UNITY_EDITOR)
+    private SoftwareBitmap pictureAsSoftwareBitmap;
+#endif
 
     public Picture(byte[] image)
     {
-        Task.Run(() => LoadImageFromMem(image));
         AsByteArray = image;
     }
 
@@ -23,9 +25,12 @@ public class Picture
         get; set;
     }
 
-    public SoftwareBitmap AsSoftwareBitmap
+#if (!UNITY_EDITOR)
+    public async Task<SoftwareBitmap> AsSoftwareBitmap()
     {
-        get; set;
+        if (this.pictureAsSoftwareBitmap == null)
+            await LoadImageFromMem(AsByteArray);
+        return this.pictureAsSoftwareBitmap;
     }
 
     /// <summary>
@@ -44,8 +49,8 @@ public class Picture
             var decoder = await BitmapDecoder.CreateAsync(randomAccessStream);
 
             var bitmapTemp = await decoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
-            AsSoftwareBitmap = bitmapTemp;
+            this.pictureAsSoftwareBitmap = bitmapTemp;
         }
     }
-
+#endif
 }

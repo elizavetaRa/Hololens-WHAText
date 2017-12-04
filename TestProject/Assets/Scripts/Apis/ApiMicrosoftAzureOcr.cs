@@ -85,7 +85,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 #endif
 
 #if (!UNITY_EDITOR)
-    public async Task<OcrResult> HttpPostImage(byte[] jsonBytes = null)
+    public async Task<OcrResult> HttpPostImage(Picture screenshot = null)
     {
         HttpClient client = new HttpClient();
         // Set Api keys
@@ -96,8 +96,12 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         string requestUri = Uri + "?" + requestParameters;
         HttpResponseMessage response;
 
-        // Request body. Posts a locally stored JPEG image.
-        byte[] byteData = await GetImageAsByteArray("Assets\\Schriftarten.PNG");
+        // Request body.
+        byte[] byteData;
+        if (screenshot == null)
+            byteData = await GetImageAsByteArray("Assets\\Schriftarten.PNG");
+        else
+            byteData = screenshot.AsByteArray;
 
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
