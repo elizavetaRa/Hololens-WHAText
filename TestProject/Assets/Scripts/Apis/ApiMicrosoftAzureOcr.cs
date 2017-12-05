@@ -87,6 +87,8 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 #if (!UNITY_EDITOR)
     public async Task<OcrResult> HttpPostImage(Picture screenshot = null)
     {
+        // Reset OcrResult
+        OcrResult = null;
         HttpClient client = new HttpClient();
         // Set Api keys
         client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", ApiKey);
@@ -101,7 +103,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         if (screenshot == null)
             byteData = await GetImageAsByteArray("Assets\\Schriftarten.PNG");
         else
-            byteData = screenshot.AsByteArray;
+            byteData = screenshot.AsJPEG;
 
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
@@ -132,15 +134,23 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                     break;
                 }
 
+                catch (HttpRequestException httpException)
+                {
+                    System.Diagnostics.Debug.WriteLine("Network Error. Falling back to local OCR");
+                    throw new HttpRequestException("HTTP Request Error");
+                }
+
                 catch (Exception e)
                 {
                     System.Diagnostics.Debug.WriteLine("Api Request Error: " + e);
                     await Task.Delay(delay);
                     count++;
                 }
+                   
             }
         }
 
+        System.Diagnostics.Debug.WriteLine("OCR finished");
         return OcrResult;
     }
 

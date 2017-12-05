@@ -140,7 +140,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         if (screenshot == null)
             await LoadSampleImageFromFile();
         else
-            await screenshot.AsSoftwareBitmap();
+            this.bitmap = await screenshot.AsSoftwareBitmap();
 
         if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
         {

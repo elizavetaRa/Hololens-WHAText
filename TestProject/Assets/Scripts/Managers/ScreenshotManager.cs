@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine.VR.WSA.WebCam;
+using System.Threading.Tasks;
 
 ///https://docs.unity3d.com/2017.1/Documentation/ScriptReference/VR.WSA.WebCam.PhotoCapture.html
 
@@ -13,7 +14,8 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 	
 	 /// <summary> object that performs the photo capture </summary>
 	PhotoCapture photoCaptureObject = null;
-	
+
+    Resolution cameraResolution;
 	
 	Texture2D targetTexture = null;
     Renderer quadRenderer = null;
@@ -26,12 +28,16 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     // Use this for initialization
     void Start()
     {
-		//First: Last: worst resolution?
-        Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+
+    }
+
+    public void TakeScreenshot() {
+        //First: Last: worst resolution?
+        cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
-		//Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
         PhotoCapture.CreateAsync(false, delegate(PhotoCapture captureObject) {
                 photoCaptureObject = captureObject;
 				
@@ -60,13 +66,18 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             // play photo capture sound
             //Camera.main.GetComponent<AudioSource>().Play();
 
-            List<byte> imageBufferList = new List<byte>();
+            // save photograph to texture
+            Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
+            photoCaptureFrame.UploadImageDataToTexture(screenshot);
+            
+            
+            /*List<byte> imageBufferList = new List<byte>();
 
             // Convert to Byte List
-            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);
+            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
 
             // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(imageBufferList));
+            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot));
             
         }
 
@@ -90,7 +101,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     /// called whenever a screenshot has been taken
     /// </summary>
     /// <param name="e"></param>
-    protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
+    protected virtual async Task OnScreenshotTaken(QueryPhotoEventArgs e)
     {
         // send event if there are subscribers
         EventHandler<QueryPhotoEventArgs> handler = ScreenshotTaken;
@@ -107,23 +118,23 @@ public class QueryPhotoEventArgs : EventArgs
     /// constructor for the photo capture event parameters
     /// </summary>
     /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(List<byte> l)
+    public QueryPhotoEventArgs(Texture2D texture)
     {
-        byteList = l;
+        ScreenshotAsTexture = texture;
     }
 
 
     /// <summary>
     /// Bytelist of the captured screenshot
     /// </summary>
-    private List<byte> byteList;
+    private Texture2D screenshot;
 
 
     /// <summary>
     /// Bytelist of the captured screenshot
     /// </summary>
-    public List<byte> ScreenshotByteList
+    public Texture2D ScreenshotAsTexture
     {
-        get { return byteList; }
+        get; private set;
     }
 }
