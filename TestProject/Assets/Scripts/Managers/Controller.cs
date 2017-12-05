@@ -34,17 +34,13 @@ public class Controller : Singleton<Controller>
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
-<<<<<<< HEAD
         apiManager.ImageAnalysed += onImageAnalysed;
 
 #if (!UNITY_EDITOR)
         screenshotManager.TakeScreenshot();
 #endif
-=======
-
         //repeating capturing screenshots function starts in 1s every 0.5s
-        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);
->>>>>>> Lisas_Branch
+        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);s
     }
 
 
@@ -55,8 +51,10 @@ public class Controller : Singleton<Controller>
     /// <param name="e"> the photograph event parameters </param>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
+#if (!UNITY_EDITOR)
         // initiate text regognition
         apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
+#endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
