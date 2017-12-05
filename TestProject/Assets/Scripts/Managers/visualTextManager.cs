@@ -23,16 +23,17 @@ public class visualTextManager : Singleton<visualTextManager>
 
         RaycastHit hitInfo;
         if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
-        { }
-        GameObject newArea = Instantiate(textArea);
-        TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-        visualText.text = dummyText;
-        newArea.transform.position = headPosition;
+        {
+            GameObject newArea = Instantiate(textArea);
+            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+            visualText.text = dummyText;
+            newArea.transform.position = headPosition;
 
-        Quaternion toQuat = Camera.main.transform.localRotation;
-        toQuat.x = 0;
-        toQuat.z = 0;
-        newArea.transform.rotation = toQuat;
+            Quaternion toQuat = Camera.main.transform.localRotation;
+            toQuat.x = 0;
+            toQuat.z = 0;
+            newArea.transform.rotation = toQuat;
+        }
     }
 
     // Update is called once per frame
