@@ -1,10 +1,8 @@
 using UnityEngine;
 using HoloToolkit.Unity;
-using System.Collections.Generic;
 using System;
 using System.Linq;
 using UnityEngine.VR.WSA.WebCam;
-using System.Threading.Tasks;
 
 ///https://docs.unity3d.com/2017.1/Documentation/ScriptReference/VR.WSA.WebCam.PhotoCapture.html
 
@@ -34,26 +32,31 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     public void TakeScreenshot() {
         //First: Last: worst resolution?
         cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+        //TakeScreenshot();
+    
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
         //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-        PhotoCapture.CreateAsync(false, delegate(PhotoCapture captureObject) {
-                photoCaptureObject = captureObject;
-				
-				//needed for Calling PhotoCapture.StartPhotoModeAsync
-                CameraParameters cameraParameters = new CameraParameters();
-                cameraParameters.hologramOpacity = 0.0f;
-                cameraParameters.cameraResolutionWidth = cameraResolution.width;
-                cameraParameters.cameraResolutionHeight = cameraResolution.height;
-                cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject) {
+            photoCaptureObject = captureObject;
 
-                // Activate the web camera
-                photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate(PhotoCapture.PhotoCaptureResult result) {
-                    // Take a screenshot
-                    photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-                });
+            //needed for Calling PhotoCapture.StartPhotoModeAsync
+            CameraParameters cameraParameters = new CameraParameters();
+            cameraParameters.hologramOpacity = 0.0f;
+            cameraParameters.cameraResolutionWidth = cameraResolution.width;
+            cameraParameters.cameraResolutionHeight = cameraResolution.height;
+            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+            // Activate the web camera
+            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result) {
+                // Take a screenshot
+                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+                //LogMessage("made screenshot");
             });
+        });
+
+
     }
 	
 	
@@ -82,7 +85,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
 
         // Deactivate web camera
-        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
     }
 
 	
@@ -101,7 +104,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     /// called whenever a screenshot has been taken
     /// </summary>
     /// <param name="e"></param>
-    protected virtual async Task OnScreenshotTaken(QueryPhotoEventArgs e)
+    protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
     {
         // send event if there are subscribers
         EventHandler<QueryPhotoEventArgs> handler = ScreenshotTaken;

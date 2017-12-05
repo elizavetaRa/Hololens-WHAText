@@ -1,10 +1,8 @@
 ﻿
 using HoloToolkit.Unity;
-using UnityEngine;
 using System;
-using System.Net.Http;
 #if (!UNITY_EDITOR)
-using Windows.Media.Ocr;
+using System.Net.Http;
 using System.Threading.Tasks;
 #endif
 
@@ -59,6 +57,7 @@ public class ApiManager : Singleton<ApiManager>
         if (handler != null) handler(this, e);
     }
 
+#if (!UNITY_EDITOR)
     public async Task AnalyzeImageAsync(RequestType requestType, Picture screenshot)
     {
         // get correct ocr api instance depending on request type
@@ -75,7 +74,6 @@ public class ApiManager : Singleton<ApiManager>
 
         Screenshot = screenshot;
 
-#if (!UNITY_EDITOR)
         try
         {
             result = await Api.HttpPostImage(Screenshot);
@@ -85,11 +83,11 @@ public class ApiManager : Singleton<ApiManager>
             Api = ApiMicrosoftMediaOcr.Instance;
             result = await Api.HttpPostImage(Screenshot);
         }
-#endif
 
         OnImageAnalysed(new AnalyseImageEventArgs(result));
 
     }
+#endif
 }
 
 public class AnalyseImageEventArgs : EventArgs

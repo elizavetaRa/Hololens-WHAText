@@ -1,0 +1,24 @@
+Textvollständigkeit1: Der Spiegel als EH Spiegel
+Textvollständigkeit2 gar kein Text erkannt
+Textvollständigkeit 3: gar kein Text erkannt
+
+Lichtverhältnisse_dunkel: ek torientierte oitwaretechnik (kleinere Schrift nicht erkannt)
+Lichtverhältnisse_hell: i Bernd Brügge Allen H. Dutoit Objektorientierte Softwaretechnik 
+	(kleinere Schrift nicht erkannt)
+Lichtverhältnisse_normal: aalles erkannt
+
+Schriftarten: Calibry (rot unterstrichen) nicht erkannt, Cursor als L
+	       Forte sehr fehlerhafte Erkennung
+	       Script MT sehr fehlerhafte Erkennung
+
+
+Textgröße: Mittlerer Text nicht erkannt (Hintergrund nicht ganz homogen?) andere erkannt
+
+Wenig Text: ToDo nicht erkannt, Bilderquellen als 2 boundingboxen: Bi  und Ilderquellen (Schriftart?)
+Viel Text: fast alles erkannt
+
+
+Besonderheiten: Boundingboxes für jedes Wort, bequeme json Struktur
+
+
+
