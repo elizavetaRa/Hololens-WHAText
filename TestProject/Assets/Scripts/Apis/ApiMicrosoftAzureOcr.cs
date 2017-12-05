@@ -105,6 +105,8 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         else
             byteData = screenshot.AsJPEG;
 
+        System.Diagnostics.Debug.WriteLine(" Picture height" + screenshot.AsTexture2D.height);
+
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
             // Using octet-stream for local image location

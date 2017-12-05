@@ -43,7 +43,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     {
 
         // send log message and set waiting mode
-        //LogMessage("Tapped for screenshot");
+        System.Diagnostics.Debug.WriteLine("Tap was recognized.");
 
         // send event to Controller
         Controller.Instance.TakeScreenshot();

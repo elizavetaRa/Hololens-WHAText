@@ -36,9 +36,7 @@ public class Controller : Singleton<Controller>
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
 
-#if (!UNITY_EDITOR)
-        screenshotManager.TakeScreenshot();
-#endif
+
         //repeating capturing screenshots function starts in 1s every 0.5s
         //InvokeRepeating("TakeScreenshot", 1f, 0.5f);s
     }
@@ -53,7 +51,7 @@ public class Controller : Singleton<Controller>
     {
 #if (!UNITY_EDITOR)
         // initiate text regognition
-        apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
+        apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
 #endif
     }
 

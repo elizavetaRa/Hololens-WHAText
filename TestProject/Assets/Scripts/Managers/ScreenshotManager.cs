@@ -29,22 +29,23 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     // Use this for initialization
     void Start()
     {
+        //First: Last: worst resolution?
+        cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+        System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
 
+        targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
     }
 
     internal void TakeScreenshot()
     {
-        //First: Last: worst resolution?
-        Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
-        System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width); 
-
-        targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
+        
 
         // Create a PhotoCapture object
         //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
         PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
         {
-            photoCaptureObject = captureObject;
+            photoCaptureObject = null;
+           photoCaptureObject = captureObject;
 
             //needed for Calling PhotoCapture.StartPhotoModeAsync
             CameraParameters cameraParameters = new CameraParameters();
@@ -75,8 +76,9 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             // save photograph to texture
             Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
             photoCaptureFrame.UploadImageDataToTexture(screenshot);
-            
-            
+            System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+
+
             /*List<byte> imageBufferList = new List<byte>();
 
             // Convert to Byte List
@@ -88,7 +90,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
 
         // Deactivate web camera
-        //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
     }
 
 	
