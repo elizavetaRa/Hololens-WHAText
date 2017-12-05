@@ -26,28 +26,36 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     // Use this for initialization
     void Start()
     {
-		//First: Last: worst resolution?
+        //TakeScreenshot();
+    }
+
+    internal void TakeScreenshot()
+    {
+        //First: Last: worst resolution?
         Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
-		//Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-        PhotoCapture.CreateAsync(false, delegate(PhotoCapture captureObject) {
-                photoCaptureObject = captureObject;
-				
-				//needed for Calling PhotoCapture.StartPhotoModeAsync
-                CameraParameters cameraParameters = new CameraParameters();
-                cameraParameters.hologramOpacity = 0.0f;
-                cameraParameters.cameraResolutionWidth = cameraResolution.width;
-                cameraParameters.cameraResolutionHeight = cameraResolution.height;
-                cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject) {
+            photoCaptureObject = captureObject;
 
-                // Activate the web camera
-                photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate(PhotoCapture.PhotoCaptureResult result) {
-                    // Take a screenshot
-                    photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-                });
+            //needed for Calling PhotoCapture.StartPhotoModeAsync
+            CameraParameters cameraParameters = new CameraParameters();
+            cameraParameters.hologramOpacity = 0.0f;
+            cameraParameters.cameraResolutionWidth = cameraResolution.width;
+            cameraParameters.cameraResolutionHeight = cameraResolution.height;
+            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+            // Activate the web camera
+            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result) {
+                // Take a screenshot
+                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+                //LogMessage("made screenshot");
             });
+        });
+
+
     }
 	
 	
@@ -71,7 +79,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
 
         // Deactivate web camera
-        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
     }
 
 	

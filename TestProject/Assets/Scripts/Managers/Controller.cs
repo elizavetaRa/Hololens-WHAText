@@ -11,6 +11,10 @@ public class Controller : Singleton<Controller>
     private ApiManager apiManager;
 
 
+    /// <summary> reference to the API manager instance </summary>
+    private GesturesManager gesturesManager;
+
+
     //private Picture screenshot;
 
 
@@ -26,7 +30,10 @@ public class Controller : Singleton<Controller>
         screenshotManager = ScreenshotManager.Instance;
 
         // subscribe to events
-        //screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+        screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+
+        //repeating capturing screenshots function starts in 1s every 0.5s
+        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);
     }
 
 
@@ -42,6 +49,12 @@ public class Controller : Singleton<Controller>
 
         // initiate text regognition
         apiManager.AnalyzeImage(RequestType.LOCAL, new Picture(screenshotAsByteArray));
+    }
+
+    public void TakeScreenshot()
+    {
+        screenshotManager.TakeScreenshot();
+
     }
 
 
