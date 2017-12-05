@@ -20,7 +20,15 @@ public class ApiManager : Singleton<ApiManager>
 
     protected void Start()
     {
+<<<<<<< HEAD
         //InitSelectedService();
+=======
+        Debug.Log("Selected Service:" + SelectedService);
+#if (!UNITY_EDITOR)
+        System.Diagnostics.Debug.WriteLine("Selected Service:" + SelectedService);
+       
+#endif
+>>>>>>> Lisas_Branch
     }
 
     /// <summary>

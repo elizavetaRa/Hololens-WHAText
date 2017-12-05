@@ -14,6 +14,10 @@ public class Controller : Singleton<Controller>
     private ApiManager apiManager;
 
 
+    /// <summary> reference to the API manager instance </summary>
+    private GesturesManager gesturesManager;
+
+
     //private Picture screenshot;
 
 
@@ -30,11 +34,17 @@ public class Controller : Singleton<Controller>
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
+<<<<<<< HEAD
         apiManager.ImageAnalysed += onImageAnalysed;
 
 #if (!UNITY_EDITOR)
         screenshotManager.TakeScreenshot();
 #endif
+=======
+
+        //repeating capturing screenshots function starts in 1s every 0.5s
+        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);
+>>>>>>> Lisas_Branch
     }
 
 
@@ -53,6 +63,12 @@ public class Controller : Singleton<Controller>
     {
         if (e.Result == null)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+    }
+
+    public void TakeScreenshot()
+    {
+        screenshotManager.TakeScreenshot();
+
     }
 
 

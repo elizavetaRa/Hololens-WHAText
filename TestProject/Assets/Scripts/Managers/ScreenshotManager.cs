@@ -28,16 +28,27 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     // Use this for initialization
     void Start()
     {
+<<<<<<< HEAD
 
     }
 
     public void TakeScreenshot() {
         //First: Last: worst resolution?
         cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+=======
+        //TakeScreenshot();
+    }
+
+    internal void TakeScreenshot()
+    {
+        //First: Last: worst resolution?
+        Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
+>>>>>>> Lisas_Branch
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
 
         // Create a PhotoCapture object
         //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+<<<<<<< HEAD
         PhotoCapture.CreateAsync(false, delegate(PhotoCapture captureObject) {
                 photoCaptureObject = captureObject;
 				
@@ -53,7 +64,27 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
                     // Take a screenshot
                     photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
                 });
+=======
+        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject) {
+            photoCaptureObject = captureObject;
+
+            //needed for Calling PhotoCapture.StartPhotoModeAsync
+            CameraParameters cameraParameters = new CameraParameters();
+            cameraParameters.hologramOpacity = 0.0f;
+            cameraParameters.cameraResolutionWidth = cameraResolution.width;
+            cameraParameters.cameraResolutionHeight = cameraResolution.height;
+            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+            // Activate the web camera
+            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result) {
+                // Take a screenshot
+                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+                //LogMessage("made screenshot");
+>>>>>>> Lisas_Branch
             });
+        });
+
+
     }
 	
 	
@@ -82,7 +113,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
 
         // Deactivate web camera
-        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
     }
 
 	
