@@ -5,27 +5,29 @@ using UnityEngine;
 using System;
 public class visualTextManager : Singleton<visualTextManager>
 {
-    public string dummy = "WAS?";
+    public string dummy = "Hundefutter";
     public GameObject textArea;
     public GameObject OcrResult;
     public GameObject SpatialMapping;
     // Use this for initialization
     void Start()
     {
-        //visualizeText(dummy);
+        visualizeText(dummy);
     }
 
     private void visualizeText(string dummyText)
     {
-
+        GameObject newArea = Instantiate(textArea);
+        TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+        visualText.text = dummyText;
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
 
         RaycastHit hitInfo;
         if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
         {
-            GameObject newArea = Instantiate(textArea);
-            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+           // GameObject newArea = Instantiate(textArea);
+            //TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
             visualText.text = dummyText;
             newArea.transform.position = headPosition;
 
