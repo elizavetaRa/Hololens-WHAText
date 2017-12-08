@@ -41,7 +41,7 @@ public class GesturesManager: Singleton<GesturesManager> {
         System.Diagnostics.Debug.WriteLine("Tap was recognized.");
 
         // send event to Controller
-        Controller.Instance.TakeScreenshot();
+        Controller.Instance.RequestImageProcessing(RequestCause.USERINITIATED);
 
     }
 

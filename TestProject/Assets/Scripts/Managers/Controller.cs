@@ -1,5 +1,7 @@
 using HoloToolkit.Unity;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
@@ -26,8 +28,9 @@ public class Controller : Singleton<Controller>
     private const float longTime = .7F;
     private const float shortTime = .1F;
 
-    private bool processingScreenshot;
+    private RequestCause currentRequestCause, nextRequestCause;
 
+    private bool processingScreenshot;
 
     //private Picture screenshot;
 
@@ -51,29 +54,38 @@ public class Controller : Singleton<Controller>
         timeCounter = 0;
         timeInterval = 1;
 
+        currentRequestCause = RequestCause.REGULAR;
+        nextRequestCause = RequestCause.REGULAR;
+
         //repeating capturing screenshots function starts in 1s every 0.5s
         //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
     }
 
     void Update()
     {
+        // process images every timeInterval seconds
+#if (!UNITY_EDITOR)
         timeCounter += Time.deltaTime;
+#endif
         if (timeCounter >= timeInterval)
         {
             timeCounter = 0;
             if (!processingScreenshot)
             {
                 timeInterval = longTime;
-                TakeScreenshot();
+#if (!UNITY_EDITOR)
+                TakeScreenshot(nextRequestCause);
+#endif
+                // by default, request cause should always be regular processing
+                nextRequestCause = RequestCause.REGULAR;
             }
+            // check for state 'image processing finished' more often to reduce waiting time
             else
             {
                 if (timeInterval != shortTime) timeInterval = shortTime;
-                System.Diagnostics.Debug.WriteLine("Still processing screenshot after " + longTime + "seconds.");
             }
         }
     }
-
 
     /// <summary>
     /// called whenever a screenshot was taken by the screenshot manager
@@ -83,22 +95,46 @@ public class Controller : Singleton<Controller>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
 #if (!UNITY_EDITOR)
-        // initiate text regognition
-        apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
+        switch(currentRequestCause)
+        {
+            case RequestCause.REGULAR:
+                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
+                break;
+            case RequestCause.USERINITIATED:
+                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
+                break;
+        }
 #endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        processingScreenshot = false;
-
-        if (e.Result == null)
+        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+
+        processingScreenshot = false;
+        currentRequestCause = nextRequestCause;
     }
 
-    public void TakeScreenshot()
+#if (!UNITY_EDITOR)
+    public async Task TakeScreenshot(RequestCause requestCause)
     {
         processingScreenshot = true;
+        this.currentRequestCause = requestCause;
         screenshotManager.TakeScreenshot();
     }
+#endif
+
+    public void RequestImageProcessing(RequestCause requestCause)
+    {
+        nextRequestCause = requestCause;
+    }
+
+    
+}
+
+public enum RequestCause
+{
+    REGULAR,
+    USERINITIATED,
 }
