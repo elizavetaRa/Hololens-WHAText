@@ -31,7 +31,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     {
         //First: Last: worst resolution?
         cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
-        System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+        //System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
 
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
     }
@@ -76,7 +76,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             // save photograph to texture
             Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
             photoCaptureFrame.UploadImageDataToTexture(screenshot);
-            System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+            //System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
 
 
             /*List<byte> imageBufferList = new List<byte>();

@@ -1,6 +1,9 @@
 using HoloToolkit.Unity;
+using System;
+using System.Threading;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
+using UnityEngine;
 #endif
 
 /// <summary> Singleton that is responsible for management of queries, pictures and keywords </summary>
@@ -16,6 +19,14 @@ public class Controller : Singleton<Controller>
 
     /// <summary> reference to the API manager instance </summary>
     private GesturesManager gesturesManager;
+
+    private float timeCounter;
+    /// <summary> Interval in which images are being process regularly</summary>
+    private float timeInterval;
+    private const float longTime = .7F;
+    private const float shortTime = .1F;
+
+    private bool processingScreenshot;
 
 
     //private Picture screenshot;
@@ -36,9 +47,31 @@ public class Controller : Singleton<Controller>
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
 
+        processingScreenshot = false;
+        timeCounter = 0;
+        timeInterval = 1;
 
         //repeating capturing screenshots function starts in 1s every 0.5s
-        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);s
+        //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
+    }
+
+    void Update()
+    {
+        timeCounter += Time.deltaTime;
+        if (timeCounter >= timeInterval)
+        {
+            timeCounter = 0;
+            if (!processingScreenshot)
+            {
+                timeInterval = longTime;
+                TakeScreenshot();
+            }
+            else
+            {
+                if (timeInterval != shortTime) timeInterval = shortTime;
+                System.Diagnostics.Debug.WriteLine("Still processing screenshot after " + longTime + "seconds.");
+            }
+        }
     }
 
 
@@ -57,15 +90,15 @@ public class Controller : Singleton<Controller>
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
+        processingScreenshot = false;
+
         if (e.Result == null)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
     }
 
     public void TakeScreenshot()
     {
+        processingScreenshot = true;
         screenshotManager.TakeScreenshot();
-
     }
-
-
 }

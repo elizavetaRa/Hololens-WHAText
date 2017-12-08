@@ -152,7 +152,6 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             ParseResponseData(ocrResult);
         }
         Debug.WriteLine(OcrResult.Text);
-        Debug.WriteLine("OCR finished");
         return OcrResult;
     }
 #endif
