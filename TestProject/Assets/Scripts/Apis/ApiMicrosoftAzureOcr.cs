@@ -105,7 +105,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         else
             byteData = screenshot.AsJPEG;
 
-        System.Diagnostics.Debug.WriteLine(" Picture height" + screenshot.AsTexture2D.height);
+        //System.Diagnostics.Debug.WriteLine(" Picture height" + screenshot.AsTexture2D.height);
 
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
@@ -128,11 +128,11 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                     string contentString = await response.Content.ReadAsStringAsync();
 
                     // Display the JSON response.
-                    System.Diagnostics.Debug.WriteLine("\nResponse:\n");
-                    System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
+                    //System.Diagnostics.Debug.WriteLine("\nResponse:\n");
+                    //System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
 
                     ParseResponseData(contentString);
-                    System.Diagnostics.Debug.WriteLine(OcrResult);
+                    System.Diagnostics.Debug.WriteLine("AzureOCR: " + OcrResult.Text);
                     break;
                 }
 
@@ -152,7 +152,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
             }
         }
 
-        System.Diagnostics.Debug.WriteLine("OCR finished");
+        //System.Diagnostics.Debug.WriteLine("OCR finished");
         return OcrResult;
     }
 

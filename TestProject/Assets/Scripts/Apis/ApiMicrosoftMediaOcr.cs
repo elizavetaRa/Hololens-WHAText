@@ -151,7 +151,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
             ParseResponseData(ocrResult);
         }
-        Debug.WriteLine(OcrResult.Text);
+        Debug.WriteLine("MediaOCR: " + OcrResult.Text);
         return OcrResult;
     }
 #endif
@@ -163,7 +163,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
         if (responseTemp.Text == "" || responseTemp.Text == null)
         {
-            Debug.WriteLine("No Text recognized");
+            Debug.WriteLine("MediaOCR: " + "No Text recognized");
             this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
         }
         else
