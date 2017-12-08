@@ -116,13 +116,16 @@ public class Controller : Singleton<Controller>
         currentRequestCause = nextRequestCause;
     }
 
+
 #if (!UNITY_EDITOR)
+
     public async Task TakeScreenshot(RequestCause requestCause)
     {
         processingScreenshot = true;
         this.currentRequestCause = requestCause;
         screenshotManager.TakeScreenshot();
     }
+
 #endif
 
     public void RequestImageProcessing(RequestCause requestCause)
