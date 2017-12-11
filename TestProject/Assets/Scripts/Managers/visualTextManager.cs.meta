@@ -1,14 +1,10 @@
 fileFormatVersion: 2
-guid: f793f573d0a3c4c4f8e2ba1a1d03eace
-timeCreated: 1512482721
+guid: 3345e23e533a0e248b725d6773fe066a
+timeCreated: 1512988271
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences:
-  - textArea: {fileID: 1484401551513332, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
-  - OcrResult: {instanceID: 0}
-  - SpatialMapping: {fileID: 1000010302963436, guid: 2ed75ffdf9031c94e8bce4b3d17b9928,
-      type: 2}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

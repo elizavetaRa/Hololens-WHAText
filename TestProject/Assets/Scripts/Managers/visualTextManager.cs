@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-public class visualTextManager : Singleton<visualTextManager>
+public class VisualTextManager : Singleton<VisualTextManager>
 {
     public string dummy = "Hundefutter";
     public GameObject textArea;
@@ -12,23 +12,27 @@ public class visualTextManager : Singleton<visualTextManager>
     // Use this for initialization
     void Start()
     {
-        visualizeText(dummy);
+        //visualizeText(dummy);
     }
 
-    private void visualizeText(string dummyText)
+
+    // Update is called once per frame
+    void Update()
     {
-        GameObject newArea = Instantiate(textArea);
-        TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-        visualText.text = dummyText;
+
+    }
+
+    internal void visualizeText(string someText)
+    { // visualText.text = dummyText;
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
 
         RaycastHit hitInfo;
         if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
         {
-           // GameObject newArea = Instantiate(textArea);
-            //TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-            visualText.text = dummyText;
+            GameObject newArea = Instantiate(textArea);
+            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+            visualText.text = someText;
             newArea.transform.position = headPosition;
 
             Quaternion toQuat = Camera.main.transform.localRotation;
@@ -36,12 +40,6 @@ public class visualTextManager : Singleton<visualTextManager>
             toQuat.z = 0;
             newArea.transform.rotation = toQuat;
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 }
 
