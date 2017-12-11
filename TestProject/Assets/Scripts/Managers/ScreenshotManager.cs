@@ -12,57 +12,134 @@ using System.Threading.Tasks;
 ///Demonstrates how to take a photo using the PhotoCapture functionality and display it on a Unity GameObject.
 /// <summary> Class responsible for taking screenshots </summary>
 public class ScreenshotManager: Singleton<ScreenshotManager> {
-	
-	 /// <summary> object that performs the photo capture </summary>
-	PhotoCapture photoCaptureObject = null;
+
+    /// <summary> object that performs the photo capture </summary>
+    PhotoCapture photoCaptureObject;
 
     Resolution cameraResolution;
-	
-	Texture2D targetTexture = null;
-    Renderer quadRenderer = null;
+    CameraParameters cameraParameters;
 
-    /// <summary> handles the event when a photograph was taken </summary>
+    Texture2D targetTexture;
+    // Renderer quadRenderer;
+
+    bool screenshotsTakeable = false;
+
     public event EventHandler<QueryPhotoEventArgs> ScreenshotTaken;
-
-
+    public event EventHandler<bool> ScreenshotsTakeable;
 
     // Use this for initialization
     void Start()
     {
-        //First: Last: worst resolution?
+        // Use worst screenshot resolution to reduce CPU time
         cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
-        //System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+
+        PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 
         targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
     }
 
-    internal void TakeScreenshot()
+    void Update()
     {
+        if (!screenshotsTakeable)
+        {
+            return;
+        }
+        screenshotsTakeable = false;
+        photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+    }
+
+    void Stop()
+    {
+        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+    }
+
+    private void OnPhotoCaptureCreated(PhotoCapture captureObject)
+    {
+        if (captureObject == null)
+        {
+            Debug.LogError("Photo Capture could not be created");
+        }
+
+        Debug.LogError("Photo Capture created");
+        this.photoCaptureObject = captureObject;
+
+        var supportedResolutions = (Resolution[])PhotoCapture.SupportedResolutions;
+
+        // emulator cannot take photos
+        if (supportedResolutions.Length == 0)
+        {
+            Debug.LogError("Photo mode could not be started. Are you using an emulator?");
+            this.photoCaptureObject.Dispose();
+            this.photoCaptureObject = null;
+            return;
+        }
+
+        //needed for starting photo mode
+        cameraParameters = new CameraParameters();
+        cameraParameters.hologramOpacity = 0.0f;
+        cameraParameters.cameraResolutionWidth = cameraResolution.width;
+        cameraParameters.cameraResolutionHeight = cameraResolution.height;
+        cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+        // Activate the web camera
+        photoCaptureObject.StartPhotoModeAsync(cameraParameters, OnPhotoModeStarted);
+    }
+
+    private void OnPhotoModeStarted(PhotoCapture.PhotoCaptureResult result)
+    {
+        if (result.success)
+        {
+            Debug.Log("Photo Mode started");
+            ScreenshotsTakeable?.Invoke(this, result.success);
+        }
+        else
+        {
+            Debug.LogError("Photo Mode couldn't be started");
+        }
+    }
+
+    //internal void TakeScreenshot()
+    //{
         
 
-        // Create a PhotoCapture object
-        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
-        {
-            photoCaptureObject = null;
-           photoCaptureObject = captureObject;
+    //    // Create a PhotoCapture object
+    //    //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+    //    PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
+    //    {
+           
+    //        // Activate the web camera
+    //        photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
+    //        {
+    //            if (result.success)
+    //            {
+    //                // Take a screenshot
+    //                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+    //            }
+    //            else
+    //            {
+    //                // try to capture a photograph if photo mode was already started before
+    //                if (WebCam.Mode == WebCamMode.PhotoMode)
+    //                {
+    //                    try
+    //                    {
+    //                        photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+    //                    }
+    //                    catch
+    //                    {
+    //                        Debug.LogError("Photo mode was already started but capturing did not succeed.");
+    //                    }
 
-            //needed for Calling PhotoCapture.StartPhotoModeAsync
-            CameraParameters cameraParameters = new CameraParameters();
-            cameraParameters.hologramOpacity = 0.0f;
-            cameraParameters.cameraResolutionWidth = cameraResolution.width;
-            cameraParameters.cameraResolutionHeight = cameraResolution.height;
-            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+    //                }
+    //                else
+    //                {
+    //                    // use standard photograph if using photo mode did not succeed
+    //                    Debug.LogError("Unable to start photo mode!");
+    //                }
+    //            }
+    //        });
+    //    });
 
-            // Activate the web camera
-            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
-            {
-                // Take a screenshot
-                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-            });
-        });
-
-    }
+    //}
 
 	//wenn screenshot is captured to memory
     void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
@@ -76,8 +153,6 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             // save photograph to texture
             Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
             photoCaptureFrame.UploadImageDataToTexture(screenshot);
-            //System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
-
 
             // position of camera/user at time of capturing screenshot
             var cameraToWorldMatrix = new Matrix4x4();
@@ -85,21 +160,14 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 
             photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
             photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
-            
-            //System.Diagnostics.Debug.WriteLine(" camera to World in screenshot: " + cameraToWorldMatrix);
-
-            /*List<byte> imageBufferList = new List<byte>();
-
-            // Convert to Byte List
-            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
 
             // send event with Bytelist of the captured screenshot
             OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix, projectionMatrix));
-            
         }
 
+        this.screenshotsTakeable = true;
         // Deactivate web camera
-        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
     }
 
 	
@@ -121,8 +189,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
     {
         // send event if there are subscribers
-        EventHandler<QueryPhotoEventArgs> handler = ScreenshotTaken;
-        if (handler != null) handler(this, e);
+        ScreenshotTaken?.Invoke(this, e);
     }
 
 

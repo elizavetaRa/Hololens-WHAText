@@ -16,7 +16,6 @@ public class GesturesManager: Singleton<GesturesManager> {
     /// </summary>
     private GestureRecognizer gestureRecognizer;
 
-
     // Use this for initialization
     void Start()
     {

@@ -1,0 +1,18 @@
+Hung:
+
+- POI Symbolobjekt anpassen, wesentlich verkleinern
+- nach bestimmten Zeit wird Bounding Box leicht hervorgehoben
+- Text wird anklickbar
+
+
+Lisa:
+
+- Überarbeitung der Datenstruktur für die letzten gesp. Objekte
+
+
+Max:
+
+- Optimierung der Kameranutzung
+- Trennung zwischen Screenshot machen und Screenshot Verarbeitung
+- Für einheitliche Event-Propagierung: GestureManager mit EventHandler versehen
+- Wahl der Analysemethode des Screenshots im Controller schreiben (Parallel machbar!)

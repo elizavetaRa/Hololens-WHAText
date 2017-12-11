@@ -84,10 +84,10 @@ public class VisualTextManager : Singleton<VisualTextManager>
         {
             Debug.Log("Raycast hit!");
 
-           // var drawer = this.LineRenderer.GetComponent<LineRenderer>();
+            // var drawer = this.LineRenderer.GetComponent<LineRenderer>();
             //drawer.SetPositions(new[] { headPosition, hitInfo.point});
-            
-           
+
+
             GameObject newArea = Instantiate(textArea);
             TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
             visualText.text = ocrResult.Text;

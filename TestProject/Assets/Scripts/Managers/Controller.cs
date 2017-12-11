@@ -143,6 +143,7 @@ public class Controller : Singleton<Controller>
                 apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
                 break;
         }
+
 #endif
     }
 
@@ -158,12 +159,12 @@ public class Controller : Singleton<Controller>
 
 #if (!UNITY_EDITOR)
 
-    public async Task TakeScreenshot(RequestCause requestCause)
-    {
-        //processingScreenshot = true;
-        //this.currentRequestCause = requestCause;
-        screenshotManager.TakeScreenshot();
-    }
+    //public async Task TakeScreenshot(RequestCause requestCause)
+    //{
+    //    //processingScreenshot = true;
+    //    //this.currentRequestCause = requestCause;
+    //    screenshotManager.TakeScreenshot();
+    //}
 
   
 #endif
