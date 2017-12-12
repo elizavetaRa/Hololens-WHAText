@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 114783576385946776}
   - component: {fileID: 65142661315277016}
   - component: {fileID: 114094071064036972}
+  - component: {fileID: 362469090428976832}
   m_Layer: 0
   m_Name: textArea
   m_TagString: Untagged
@@ -171,3 +172,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PivotAxis: 1
   TargetTransform: {fileID: 0}
+--- !u!362 &362469090428976832
+WorldAnchor:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1484401551513332}
+  serializedVersion: 2
