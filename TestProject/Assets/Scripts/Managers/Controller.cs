@@ -1,5 +1,7 @@
 using HoloToolkit.Unity;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -33,6 +35,9 @@ public class Controller : Singleton<Controller>
     private bool processingScreenshot;
 
     //private Picture screenshot;
+
+    // stack of 10 latest camera positions, ocrResults
+    Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
 
 
 
@@ -95,7 +100,22 @@ public class Controller : Singleton<Controller>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
 #if (!UNITY_EDITOR)
-        switch(currentRequestCause)
+
+        // store last 10 camera positions to 
+        CameraPositionResult cameraPositionResult = new CameraPositionResult();
+        cameraPositionResult.cameraToWorldMatrix = e.PositionMatrix;
+
+        if (cameraPositionResultQueue.Count > 9)
+        {
+            cameraPositionResultQueue.Dequeue();
+        }
+
+        cameraPositionResultQueue.Enqueue(cameraPositionResult);
+        //System.Diagnostics.Debug.WriteLine(" Queue: " + cameraPositionResult.cameraToWorldMatrix);
+
+
+        //start analyzing image
+        switch (currentRequestCause)
         {
             case RequestCause.REGULAR:
                 apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));

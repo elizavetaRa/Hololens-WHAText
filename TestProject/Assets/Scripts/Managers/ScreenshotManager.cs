@@ -79,13 +79,18 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             //System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
 
 
+            // position of camera/user at time of capturing screenshot
+            var cameraToWorldMatrix = new Matrix4x4();
+            photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
+
+
             /*List<byte> imageBufferList = new List<byte>();
 
             // Convert to Byte List
             photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
 
             // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot));
+            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix));
             
         }
 
@@ -126,9 +131,11 @@ public class QueryPhotoEventArgs : EventArgs
     /// constructor for the photo capture event parameters
     /// </summary>
     /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(Texture2D texture)
+    public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix)
     {
         ScreenshotAsTexture = texture;
+        PositionMatrix = positionMatrix;
+       
     }
 
 
@@ -142,6 +149,21 @@ public class QueryPhotoEventArgs : EventArgs
     /// Bytelist of the captured screenshot
     /// </summary>
     public Texture2D ScreenshotAsTexture
+    {
+        get; private set;
+    }
+
+
+    /// <summary>
+    /// cameraToWorld matrix
+    /// </summary>
+    private Matrix4x4 positionMatrix;
+
+
+    /// <summary>
+    /// cameraToWorld matrix
+    /// </summary>
+    public Matrix4x4 PositionMatrix
     {
         get; private set;
     }
