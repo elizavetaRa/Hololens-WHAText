@@ -81,8 +81,12 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 
             // position of camera/user at time of capturing screenshot
             var cameraToWorldMatrix = new Matrix4x4();
-            photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
+            var projectionMatrix = new Matrix4x4();
 
+            photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
+            photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
+            
+            //System.Diagnostics.Debug.WriteLine(" projection: " + projectionMatrix);
 
             /*List<byte> imageBufferList = new List<byte>();
 
@@ -90,7 +94,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
 
             // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix));
+            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix, projectionMatrix));
             
         }
 
@@ -131,10 +135,11 @@ public class QueryPhotoEventArgs : EventArgs
     /// constructor for the photo capture event parameters
     /// </summary>
     /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix)
+    public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix, Matrix4x4 projectionMatrix)
     {
         ScreenshotAsTexture = texture;
         PositionMatrix = positionMatrix;
+        projectionMatrix = projectionMatrix;
        
     }
 
@@ -164,6 +169,20 @@ public class QueryPhotoEventArgs : EventArgs
     /// cameraToWorld matrix
     /// </summary>
     public Matrix4x4 PositionMatrix
+    {
+        get; private set;
+    }
+
+    /// <summary>
+    /// projection matrix
+    /// </summary>
+    private Matrix4x4 projectionMatrix;
+
+
+    /// <summary>
+    /// cameraToWorld matrix
+    /// </summary>
+    public Matrix4x4 ProjectionMatrix
     {
         get; private set;
     }

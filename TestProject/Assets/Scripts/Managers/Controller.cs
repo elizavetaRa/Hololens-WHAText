@@ -35,6 +35,8 @@ public class Controller : Singleton<Controller>
     private bool processingScreenshot;
 
     //private Picture screenshot;
+    private Vector3 cameraPosition;
+    private Quaternion cameraRotation;
 
     // stack of 10 latest camera positions, ocrResults
     Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
@@ -101,17 +103,28 @@ public class Controller : Singleton<Controller>
     {
 #if (!UNITY_EDITOR)
 
+        //recalculate Camera to World Matrix to position and rotation
+        cameraPosition = e.PositionMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
+        cameraRotation = Quaternion.LookRotation(-e.PositionMatrix.GetColumn(2), e.PositionMatrix.GetColumn(1));
+        //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
+
         // store last 10 camera positions to 
         CameraPositionResult cameraPositionResult = new CameraPositionResult();
-        cameraPositionResult.cameraToWorldMatrix = e.PositionMatrix;
+
+
+        cameraPositionResult.cameraPosition = cameraPosition;
+        cameraPositionResult.cameraRotation = cameraRotation;
+        cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
 
         if (cameraPositionResultQueue.Count > 9)
         {
             cameraPositionResultQueue.Dequeue();
+
         }
 
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
-        //System.Diagnostics.Debug.WriteLine(" Queue: " + cameraPositionResult.cameraToWorldMatrix);
+        System.Diagnostics.Debug.WriteLine(" queue count: " + cameraPositionResultQueue.Count);
+        System.Diagnostics.Debug.WriteLine(" queue: " + cameraPositionResultQueue);
 
 
         //start analyzing image
