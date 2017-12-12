@@ -26,20 +26,31 @@ public class VisualTextManager : Singleton<VisualTextManager>
     { // visualText.text = dummyText;
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
-
+        Debug.Log("into function!");
         RaycastHit hitInfo;
         if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
         {
-            GameObject newArea = Instantiate(textArea);
-            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-            visualText.text = someText;
-            newArea.transform.position = headPosition;
+            Debug.Log("Raycast hit!");
+        //    GameObject newArea = Instantiate(textArea);
+        //    TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+        //    visualText.text = someText;
+        //    newArea.transform.position = new Vector3(headPosition.x, headPosition.y, headPosition.z + 3);
 
-            Quaternion toQuat = Camera.main.transform.localRotation;
-            toQuat.x = 0;
-            toQuat.z = 0;
-            newArea.transform.rotation = toQuat;
+        //    Quaternion toQuat = Camera.main.transform.localRotation;
+        //    toQuat.x = 0;
+        //    toQuat.z = 0;
+        //    newArea.transform.rotation = toQuat;
         }
+
+        GameObject newArea = Instantiate(textArea);
+        TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+        visualText.text = someText;
+        newArea.transform.position = new Vector3(headPosition.x, headPosition.y, headPosition.z + 2);
+
+        Quaternion toQuat = Camera.main.transform.localRotation;
+        toQuat.x = 0;
+        toQuat.z = 0;
+        newArea.transform.rotation = toQuat;
     }
 }
 

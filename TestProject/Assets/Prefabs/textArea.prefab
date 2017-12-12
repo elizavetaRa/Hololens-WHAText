@@ -39,7 +39,6 @@ GameObject:
   - component: {fileID: 114783576385946776}
   - component: {fileID: 65142661315277016}
   - component: {fileID: 114094071064036972}
-  - component: {fileID: 114576193698559852}
   m_Layer: 0
   m_Name: textArea
   m_TagString: Untagged
@@ -159,22 +158,6 @@ MonoBehaviour:
   SmoothPositionLerpRatio: 0.5
   SmoothRotationLerpRatio: 0.5
   SmoothScaleLerpRatio: 0.5
---- !u!114 &114576193698559852
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1484401551513332}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2be8bd2ebd8277c448d6d81c75517fee, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  TagalongDistance: 2
-  EnforceDistance: 1
-  PositionUpdateSpeed: 20
-  SmoothMotion: 1
-  SmoothingFactor: 0.75
 --- !u!114 &114783576385946776
 MonoBehaviour:
   m_ObjectHideFlags: 1
