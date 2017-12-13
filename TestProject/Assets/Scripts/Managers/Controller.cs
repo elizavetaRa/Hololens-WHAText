@@ -117,7 +117,10 @@ public class Controller : Singleton<Controller>
 
     public void displayText()
     {
-        visualTextManager.visualizeText("Hi there");
+        visualTextManager.visualizeText("0", new UnityEngine.Vector2(0, 0));
+        visualTextManager.visualizeText("1", new UnityEngine.Vector2(100, 0));
+        visualTextManager.visualizeText("2", new UnityEngine.Vector2(100, 100));
+        visualTextManager.visualizeText("3", new UnityEngine.Vector2(0, 100));
     }
 
 
