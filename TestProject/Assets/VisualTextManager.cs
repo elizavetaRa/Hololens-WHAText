@@ -19,8 +19,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
 
     }
+    
 
-    internal void visualizeText(string someText, Vector2 pixelCoords)
+    internal void visualizeText(OcrResult ocrResult)
     { // visualText.text = dummyText;
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
@@ -29,7 +30,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
 
-        Vector2 ImagePosZeroToOne = new Vector2(pixelCoords.x / ImageWidth, 1.0f - (pixelCoords.y / ImageHeight));
+        Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
         Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x,ImagePosProjected.y, 1));
         Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1));// camera location in world space
@@ -42,7 +43,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
             Debug.Log("Raycast hit!");
             GameObject newArea = Instantiate(textArea);
             TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-            visualText.text = someText;
+            visualText.text = ocrResult.Text;
             newArea.transform.position = hitInfo.point; //new Vector3(headPosition.x, headPosition.y, headPosition.z + 3);
 
             Quaternion toQuat = Camera.main.transform.localRotation;
