@@ -19,7 +19,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
 
     }
-    
+
 
     internal void visualizeText(OcrResult ocrResult)
     { // visualText.text = dummyText;
@@ -32,10 +32,40 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
         Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
-        Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x,ImagePosProjected.y, 1));
+        Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
         Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1));// camera location in world space
         Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
-       
+
+
+        RaycastHit hitInfo;
+        if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))
+        {
+            Debug.Log("Raycast hit!");
+            GameObject newArea = Instantiate(textArea);
+            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+            visualText.text = ocrResult.Text;
+            newArea.transform.position = hitInfo.point; //new Vector3(headPosition.x, headPosition.y, headPosition.z + 3);
+
+            Quaternion toQuat = Camera.main.transform.localRotation;
+            toQuat.x = 0;
+            toQuat.z = 0;
+            newArea.transform.rotation = toQuat;
+        }
+    }
+
+
+    internal void visualizeText(OcrResult ocrResult, Matrix4x4 Projection )
+    { 
+        float ImageWidth = Camera.main.pixelWidth;
+        float ImageHeight = Camera.main.pixelHeight;
+        var CameraToWorld = Camera.main.cameraToWorldMatrix;
+
+        Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
+        Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
+        Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
+        Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1));// camera location in world space
+        Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
+    
 
         RaycastHit hitInfo;
         if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))
@@ -52,12 +82,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
             newArea.transform.rotation = toQuat;
         }
 
-        //GameObject newArea = Instantiate(textArea);
-        //TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-        //visualText.text = someText;
-        //newArea.transform.position = new Vector3(headPosition.x, headPosition.y, headPosition.z + 2);
 
-        //newArea.transform.rotation = Quaternion.LookRotation(gazeDirection);
+
+
     }
     public static Vector3 UnProjectVector(Matrix4x4 proj, Vector3 to)
     {
