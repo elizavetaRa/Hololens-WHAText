@@ -54,19 +54,28 @@ public class VisualTextManager : Singleton<VisualTextManager>
     }
 
 
-    internal void visualizeText(OcrResult ocrResult, Matrix4x4 Projection, Matrix4x4 CameraToWorld )
-    { 
+    internal void visualizeText(CameraPositionResult cameraPositionResult)
+    {
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
-        //var CameraToWorld = Camera.main.cameraToWorldMatrix;
-        //var Projection = Camera.main.projectionMatrix;
+        var ocrResult = new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
+
+        var gazeDirection = Camera.main.transform.forward;
+
+        var CameraToWorld = cameraPositionResult.cameraToWorldMatrix;
+        var Projection = cameraPositionResult.projectionMatrix;
+
 
         Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
+
+
         Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
-        Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1));// camera location in world space
+
+        //Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1));// camera location in world space
+        Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyPoint3x4(new Vector3(0, 0, -1)); // camera location in world space
         Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
-    
+
 
         RaycastHit hitInfo;
         if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))

@@ -1,12 +1,12 @@
 using HoloToolkit.Unity;
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
-
+using UnityEngine;
+using System.Linq;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,10 +22,20 @@ public class Controller : Singleton<Controller>
     /// <summary> reference to the API manager instance </summary>
     private ApiManager apiManager;
 
+    private VisualTextManager visualTextManager;
 
     /// <summary> reference to the API manager instance </summary>
     private GesturesManager gesturesManager;
-    private VisualTextManager visualTextManager;
+
+    private float timeCounter;
+    /// <summary> Interval in which images are being process regularly</summary>
+    private float timeInterval;
+    private const float longTime = .7F;
+    private const float shortTime = .1F;
+
+    private RequestCause currentRequestCause, nextRequestCause;
+
+    private bool processingScreenshot;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
@@ -51,11 +61,42 @@ public class Controller : Singleton<Controller>
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
 
+        processingScreenshot = false;
+        timeCounter = 0;
+        timeInterval = 1;
+
+        currentRequestCause = RequestCause.REGULAR;
+        nextRequestCause = RequestCause.REGULAR;
 
         //repeating capturing screenshots function starts in 1s every 0.5s
-        //InvokeRepeating("TakeScreenshot", 1f, 0.5f);s
+        //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
     }
 
+    void Update()
+    {
+//        // process images every timeInterval seconds
+//#if (!UNITY_EDITOR)
+//        timeCounter += Time.deltaTime;
+//#endif
+//        if (timeCounter >= timeInterval)
+//        {
+//            timeCounter = 0;
+//            if (!processingScreenshot)
+//            {
+//                timeInterval = longTime;
+//#if (!UNITY_EDITOR)
+//                TakeScreenshot(nextRequestCause);
+//#endif
+//                // by default, request cause should always be regular processing
+//                nextRequestCause = RequestCause.REGULAR;
+//            }
+//            // check for state 'image processing finished' more often to reduce waiting time
+//            else
+//            {
+//                if (timeInterval != shortTime) timeInterval = shortTime;
+//            }
+//        }
+    }
 
     /// <summary>
     /// called whenever a screenshot was taken by the screenshot manager
@@ -65,7 +106,6 @@ public class Controller : Singleton<Controller>
     private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
     {
 #if (!UNITY_EDITOR)
-
 
         //recalculate Camera to World Matrix to position and rotation
         //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
@@ -89,6 +129,9 @@ public class Controller : Singleton<Controller>
 
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
 
+
+        displayText();
+
         //start analyzing image
         switch (currentRequestCause)
         {
@@ -99,29 +142,47 @@ public class Controller : Singleton<Controller>
                 apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
                 break;
         }
-
 #endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        if (e.Result == null)
+        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+
+        processingScreenshot = false;
+        currentRequestCause = nextRequestCause;
     }
 
-    public void TakeScreenshot()
-    {
-        screenshotManager.TakeScreenshot();
 
+#if (!UNITY_EDITOR)
+
+    public async Task TakeScreenshot(RequestCause requestCause)
+    {
+        //processingScreenshot = true;
+        //this.currentRequestCause = requestCause;
+        screenshotManager.TakeScreenshot();
+    }
+
+  
+#endif
+
+    public void RequestImageProcessing(RequestCause requestCause)
+    {
+        nextRequestCause = requestCause;
     }
 
     public void displayText()
     {
-        visualTextManager.visualizeText(new OcrResult("0", new UnityEngine.Rect(0, 0, 100, 100)));
-        //visualTextManager.visualizeText(new OcrResult("1", new UnityEngine.Rect(100, 0, 100, 100)));
-        //visualTextManager.visualizeText(new OcrResult("2", new UnityEngine.Rect(100, 100, 100, 100)));
-        //visualTextManager.visualizeText(new OcrResult("3", new UnityEngine.Rect(0, 100, 100, 100)));
+        var size = cameraPositionResultQueue.Count;
+        visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size-1));
     }
 
 
+}
+
+public enum RequestCause
+{
+    REGULAR,
+    USERINITIATED,
 }

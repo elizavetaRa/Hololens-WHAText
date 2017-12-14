@@ -8,10 +8,11 @@ public struct CameraPositionResult
 {
     // Matrix that transforms from camera space to world space.
     //Use this to calculate where in the world a specific camera space point is
-    public Vector3 cameraPosition;
-    public Quaternion cameraRotation;
+    //public Vector3 cameraPosition;
+    //public Quaternion cameraRotation;
 
     public Matrix4x4 projectionMatrix;
+    public Matrix4x4 cameraToWorldMatrix;
 
     //result of recognition with screenshot
     public OcrResult ocrResult;

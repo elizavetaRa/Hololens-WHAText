@@ -46,8 +46,9 @@ public class GesturesManager: Singleton<GesturesManager> {
         System.Diagnostics.Debug.WriteLine("Tap was recognized.");
 
         // send event to Controller
-        //Controller.Instance.TakeScreenshot();
-        Controller.Instance.displayText();
+#if (!UNITY_EDITOR)
+        Controller.Instance.TakeScreenshot(RequestCause.USERINITIATED);
+#endif
 
     }
 
