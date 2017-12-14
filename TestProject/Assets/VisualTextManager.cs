@@ -38,7 +38,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))
+        if (Physics.Raycast(headPosition, gazeDirection, out hitInfo))
         {
             Debug.Log("Raycast hit!");
             GameObject newArea = Instantiate(textArea);
@@ -54,11 +54,12 @@ public class VisualTextManager : Singleton<VisualTextManager>
     }
 
 
-    internal void visualizeText(OcrResult ocrResult, Matrix4x4 Projection )
+    internal void visualizeText(OcrResult ocrResult, Matrix4x4 Projection, Matrix4x4 CameraToWorld )
     { 
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
-        var CameraToWorld = Camera.main.cameraToWorldMatrix;
+        //var CameraToWorld = Camera.main.cameraToWorldMatrix;
+        //var Projection = Camera.main.projectionMatrix;
 
         Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space

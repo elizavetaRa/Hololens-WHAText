@@ -118,9 +118,9 @@ public class Controller : Singleton<Controller>
     public void displayText()
     {
         visualTextManager.visualizeText(new OcrResult("0", new UnityEngine.Rect(0, 0, 100, 100)));
-        visualTextManager.visualizeText(new OcrResult("1", new UnityEngine.Rect(100, 0, 100, 100)));
-        visualTextManager.visualizeText(new OcrResult("2", new UnityEngine.Rect(100, 100, 100, 100)));
-        visualTextManager.visualizeText(new OcrResult("3", new UnityEngine.Rect(0, 100, 100, 100)));
+        //visualTextManager.visualizeText(new OcrResult("1", new UnityEngine.Rect(100, 0, 100, 100)));
+        //visualTextManager.visualizeText(new OcrResult("2", new UnityEngine.Rect(100, 100, 100, 100)));
+        //visualTextManager.visualizeText(new OcrResult("3", new UnityEngine.Rect(0, 100, 100, 100)));
     }
 
 
