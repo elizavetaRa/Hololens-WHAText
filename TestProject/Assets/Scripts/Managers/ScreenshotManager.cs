@@ -86,7 +86,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
             photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
             photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
             
-            //System.Diagnostics.Debug.WriteLine(" projection: " + projectionMatrix);
+            //System.Diagnostics.Debug.WriteLine(" camera to World in screenshot: " + cameraToWorldMatrix);
 
             /*List<byte> imageBufferList = new List<byte>();
 
@@ -138,12 +138,12 @@ public class QueryPhotoEventArgs : EventArgs
     public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix, Matrix4x4 projectionMatrix)
     {
         ScreenshotAsTexture = texture;
-        PositionMatrix = positionMatrix;
-        projectionMatrix = projectionMatrix;
+        CameraToWorldMatrix = cameraToWorldMatrix;
+        ProjectionMatrix = projectionMatrix;
        
     }
 
-
+    
     /// <summary>
     /// Bytelist of the captured screenshot
     /// </summary>
@@ -162,13 +162,13 @@ public class QueryPhotoEventArgs : EventArgs
     /// <summary>
     /// cameraToWorld matrix
     /// </summary>
-    private Matrix4x4 positionMatrix;
+    private Matrix4x4 cameraToWorldMatrix;
 
 
     /// <summary>
     /// cameraToWorld matrix
     /// </summary>
-    public Matrix4x4 PositionMatrix
+    public Matrix4x4 CameraToWorldMatrix
     {
         get; private set;
     }

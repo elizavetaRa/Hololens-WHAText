@@ -104,16 +104,17 @@ public class Controller : Singleton<Controller>
 #if (!UNITY_EDITOR)
 
         //recalculate Camera to World Matrix to position and rotation
-        cameraPosition = e.PositionMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
-        cameraRotation = Quaternion.LookRotation(-e.PositionMatrix.GetColumn(2), e.PositionMatrix.GetColumn(1));
+        //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
+        //cameraRotation = Quaternion.LookRotation(-e.CameraToWorldMatrix.GetColumn(2), e.CameraToWorldMatrix.GetColumn(1));
         //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
 
-        // store last 10 camera positions to 
+        // store last 10 camera positions to queue of cemera position results
         CameraPositionResult cameraPositionResult = new CameraPositionResult();
 
 
-        cameraPositionResult.cameraPosition = cameraPosition;
-        cameraPositionResult.cameraRotation = cameraRotation;
+        //cameraPositionResult.cameraPosition = cameraPosition;
+        //cameraPositionResult.cameraRotation = cameraRotation;
+        cameraPositionResult.cameraToWorldMatrix = e.CameraToWorldMatrix;
         cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
 
         if (cameraPositionResultQueue.Count > 9)
@@ -123,9 +124,6 @@ public class Controller : Singleton<Controller>
         }
 
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
-        System.Diagnostics.Debug.WriteLine(" queue count: " + cameraPositionResultQueue.Count);
-        System.Diagnostics.Debug.WriteLine(" queue: " + cameraPositionResultQueue);
-
 
         //start analyzing image
         switch (currentRequestCause)
