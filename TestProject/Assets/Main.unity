@@ -371,7 +371,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dummy: Hundefutter
-  textArea: {fileID: 1824266313210100, guid: 534c97203a3a99140afa6b11b02282fb, type: 2}
+  textArea: {fileID: 1983034937031174, guid: 9196578ed773f57419dc3573d3c58a28, type: 2}
   LineRenderer: {fileID: 0}
 --- !u!114 &1383684482
 MonoBehaviour:
