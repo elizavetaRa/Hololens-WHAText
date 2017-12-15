@@ -7,6 +7,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 {
     public string dummy = "Hundefutter";
     public GameObject textArea;
+    public GameObject LineRenderer;
     // Use this for initialization
     void Start()
     {
@@ -60,6 +61,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float ImageHeight = Camera.main.pixelHeight;
         var ocrResult = new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
 
+        var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
 
         var CameraToWorld = cameraPositionResult.cameraToWorldMatrix;
@@ -78,9 +80,14 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))
+        if (Physics.Raycast(headPosition, WorldSpaceRayPoint2, out hitInfo))
         {
             Debug.Log("Raycast hit!");
+
+           // var drawer = this.LineRenderer.GetComponent<LineRenderer>();
+            //drawer.SetPositions(new[] { headPosition, hitInfo.point});
+            
+           
             GameObject newArea = Instantiate(textArea);
             TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
             visualText.text = ocrResult.Text;

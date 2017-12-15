@@ -129,8 +129,10 @@ public class Controller : Singleton<Controller>
 
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
 
-
-        displayText();
+        if(cameraPositionResultQueue.Count > 0)
+        {
+            this.displayText();
+        }
 
         //start analyzing image
         switch (currentRequestCause)
@@ -175,6 +177,7 @@ public class Controller : Singleton<Controller>
     public void displayText()
     {
         var size = cameraPositionResultQueue.Count;
+        
         visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size-1));
     }
 
