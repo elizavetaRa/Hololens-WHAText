@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using UnityEngine;
+using System.Linq;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
 using UnityEngine;
@@ -20,6 +22,7 @@ public class Controller : Singleton<Controller>
     /// <summary> reference to the API manager instance </summary>
     private ApiManager apiManager;
 
+    private VisualTextManager visualTextManager;
 
     /// <summary> reference to the API manager instance </summary>
     private GesturesManager gesturesManager;
@@ -52,6 +55,7 @@ public class Controller : Singleton<Controller>
         // link managers
         apiManager = ApiManager.Instance;
         screenshotManager = ScreenshotManager.Instance;
+        visualTextManager = VisualTextManager.Instance;
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
@@ -70,28 +74,28 @@ public class Controller : Singleton<Controller>
 
     void Update()
     {
-        // process images every timeInterval seconds
-#if (!UNITY_EDITOR)
-        timeCounter += Time.deltaTime;
-#endif
-        if (timeCounter >= timeInterval)
-        {
-            timeCounter = 0;
-            if (!processingScreenshot)
-            {
-                timeInterval = longTime;
-#if (!UNITY_EDITOR)
-                TakeScreenshot(nextRequestCause);
-#endif
-                // by default, request cause should always be regular processing
-                nextRequestCause = RequestCause.REGULAR;
-            }
-            // check for state 'image processing finished' more often to reduce waiting time
-            else
-            {
-                if (timeInterval != shortTime) timeInterval = shortTime;
-            }
-        }
+        //        // process images every timeInterval seconds
+        //#if (!UNITY_EDITOR)
+        //        timeCounter += Time.deltaTime;
+        //#endif
+        //        if (timeCounter >= timeInterval)
+        //        {
+        //            timeCounter = 0;
+        //            if (!processingScreenshot)
+        //            {
+        //                timeInterval = longTime;
+        //#if (!UNITY_EDITOR)
+        //                TakeScreenshot(nextRequestCause);
+        //#endif
+        //                // by default, request cause should always be regular processing
+        //                nextRequestCause = RequestCause.REGULAR;
+        //            }
+        //            // check for state 'image processing finished' more often to reduce waiting time
+        //            else
+        //            {
+        //                if (timeInterval != shortTime) timeInterval = shortTime;
+        //            }
+        //        }
     }
 
     /// <summary>
@@ -120,10 +124,12 @@ public class Controller : Singleton<Controller>
         if (cameraPositionResultQueue.Count > 9)
         {
             cameraPositionResultQueue.Dequeue();
-
         }
 
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
+
+
+        //displayText();
 
         //start analyzing image
         switch (currentRequestCause)
@@ -152,11 +158,12 @@ public class Controller : Singleton<Controller>
 
     public async Task TakeScreenshot(RequestCause requestCause)
     {
-        processingScreenshot = true;
-        this.currentRequestCause = requestCause;
+        //processingScreenshot = true;
+        //this.currentRequestCause = requestCause;
         screenshotManager.TakeScreenshot();
     }
 
+  
 #endif
 
     public void RequestImageProcessing(RequestCause requestCause)
@@ -164,7 +171,13 @@ public class Controller : Singleton<Controller>
         nextRequestCause = requestCause;
     }
 
-    
+    public void displayText()
+    {
+        var size = cameraPositionResultQueue.Count;
+        visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size - 1));
+    }
+
+
 }
 
 public enum RequestCause
