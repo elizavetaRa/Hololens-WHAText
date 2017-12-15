@@ -367,12 +367,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1383684476}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32024c5790cea4a4d9b78ece247850ce, type: 3}
+  m_Script: {fileID: 11500000, guid: 7736b80bf17c7274098b22c224155ed1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   dummy: Hundefutter
-  textArea: {fileID: 1484401551513332, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
-  LineRenderer: {fileID: 1857668436}
+  textArea: {fileID: 1824266313210100, guid: 534c97203a3a99140afa6b11b02282fb, type: 2}
+  LineRenderer: {fileID: 0}
 --- !u!114 &1383684482
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -59,8 +59,10 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
-        var ocrResult = new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
-
+        //var ocrResult = new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
+        var ocrResult = cameraPositionResult.ocrResult;
+        var centerX = ocrResult.BoundingBox.x + ocrResult.BoundingBox.width / 2;
+        var centerY = ocrResult.BoundingBox.y + ocrResult.BoundingBox.height / 2;
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
 
@@ -68,7 +70,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         var Projection = cameraPositionResult.projectionMatrix;
 
 
-        Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
+        Vector2 ImagePosZeroToOne = new Vector2(centerX / ImageWidth, 1.0f - (centerY / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
 
 
@@ -80,17 +82,17 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
         RaycastHit hitInfo;
-        if (Physics.Raycast(headPosition, WorldSpaceRayPoint2, out hitInfo))
+        if (Physics.Raycast(WorldSpaceRayPoint1, WorldSpaceRayPoint2, out hitInfo))
         {
             Debug.Log("Raycast hit!");
 
-           // var drawer = this.LineRenderer.GetComponent<LineRenderer>();
+            // var drawer = this.LineRenderer.GetComponent<LineRenderer>();
             //drawer.SetPositions(new[] { headPosition, hitInfo.point});
-            
-           
+
+
             GameObject newArea = Instantiate(textArea);
-            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-            visualText.text = ocrResult.Text;
+            //TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+            //visualText.text = ocrResult.Text;
             newArea.transform.position = hitInfo.point; //new Vector3(headPosition.x, headPosition.y, headPosition.z + 3);
 
             Quaternion toQuat = Camera.main.transform.localRotation;

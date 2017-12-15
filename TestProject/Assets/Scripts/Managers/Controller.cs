@@ -36,6 +36,7 @@ public class Controller : Singleton<Controller>
     private RequestCause currentRequestCause, nextRequestCause;
 
     private bool processingScreenshot;
+    private CameraPositionResult cameraPositionResultTemp;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
@@ -67,6 +68,9 @@ public class Controller : Singleton<Controller>
 
         currentRequestCause = RequestCause.REGULAR;
         nextRequestCause = RequestCause.REGULAR;
+
+        // store last 10 camera positions to queue of cemera position results
+        cameraPositionResultTemp = new CameraPositionResult();
 
         //repeating capturing screenshots function starts in 1s every 0.5s
         //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
@@ -113,24 +117,12 @@ public class Controller : Singleton<Controller>
         //cameraRotation = Quaternion.LookRotation(-e.CameraToWorldMatrix.GetColumn(2), e.CameraToWorldMatrix.GetColumn(1));
         //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
 
-        // store last 10 camera positions to queue of cemera position results
-        CameraPositionResult cameraPositionResult = new CameraPositionResult();
-
 
         //cameraPositionResult.cameraPosition = cameraPosition;
         //cameraPositionResult.cameraRotation = cameraRotation;
-        cameraPositionResult.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
+        cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
+        cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
 
-        if (cameraPositionResultQueue.Count > 9)
-        {
-            cameraPositionResultQueue.Dequeue();
-        }
-
-        cameraPositionResultQueue.Enqueue(cameraPositionResult);
-
-
-            this.displayText();
         
 
         //start analyzing image
@@ -151,6 +143,15 @@ public class Controller : Singleton<Controller>
         if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
 
+        // check for capacity of result queue
+        if (cameraPositionResultQueue.Count > 9)
+        {
+            cameraPositionResultQueue.Dequeue();
+        }
+
+        cameraPositionResultTemp.ocrResult = e.Result;
+        cameraPositionResultQueue.Enqueue(cameraPositionResultTemp);
+        displayText();
         processingScreenshot = false;
         currentRequestCause = nextRequestCause;
     }
