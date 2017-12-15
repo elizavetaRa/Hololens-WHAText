@@ -20,11 +20,16 @@ public class GesturesManager: Singleton<GesturesManager> {
     // Use this for initialization
     void Start()
     {
+
+
+
         // create an new gesture recognizer to detect when user taps to shoot a screenshot
         gestureRecognizer = new GestureRecognizer();
         gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
         gestureRecognizer.TappedEvent += OnTap;
         gestureRecognizer.StartCapturingGestures();
+
+
     }
 
 
@@ -41,7 +46,9 @@ public class GesturesManager: Singleton<GesturesManager> {
         System.Diagnostics.Debug.WriteLine("Tap was recognized.");
 
         // send event to Controller
-        Controller.Instance.RequestImageProcessing(RequestCause.USERINITIATED);
+#if (!UNITY_EDITOR)
+        Controller.Instance.TakeScreenshot(RequestCause.USERINITIATED);
+#endif
 
     }
 

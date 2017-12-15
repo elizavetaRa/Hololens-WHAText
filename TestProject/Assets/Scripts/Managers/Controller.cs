@@ -96,6 +96,7 @@ public class Controller : Singleton<Controller>
         //                if (timeInterval != shortTime) timeInterval = shortTime;
         //            }
         //        }
+
     }
 
     /// <summary>
@@ -129,7 +130,8 @@ public class Controller : Singleton<Controller>
         cameraPositionResultQueue.Enqueue(cameraPositionResult);
 
 
-        //displayText();
+            this.displayText();
+        
 
         //start analyzing image
         switch (currentRequestCause)
@@ -174,7 +176,9 @@ public class Controller : Singleton<Controller>
     public void displayText()
     {
         var size = cameraPositionResultQueue.Count;
+
         visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size - 1));
+
     }
 
 
