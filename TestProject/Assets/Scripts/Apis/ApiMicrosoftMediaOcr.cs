@@ -149,6 +149,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         else
         {
             var ocrResult = await ocrEngine.RecognizeAsync(bitmap);
+            Debug.WriteLine(ocrResult);
             ParseResponseData(ocrResult);
         }
         Debug.WriteLine("MediaOCR: " + OcrResult.Text);

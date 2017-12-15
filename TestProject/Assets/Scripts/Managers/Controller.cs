@@ -69,38 +69,33 @@ public class Controller : Singleton<Controller>
         currentRequestCause = RequestCause.REGULAR;
         nextRequestCause = RequestCause.REGULAR;
 
-        // store last 10 camera positions to queue of cemera position results
         cameraPositionResultTemp = new CameraPositionResult();
-
-        //repeating capturing screenshots function starts in 1s every 0.5s
-        //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
     }
 
     void Update()
     {
-        //        // process images every timeInterval seconds
-        //#if (!UNITY_EDITOR)
-        //        timeCounter += Time.deltaTime;
-        //#endif
-        //        if (timeCounter >= timeInterval)
-        //        {
-        //            timeCounter = 0;
-        //            if (!processingScreenshot)
-        //            {
-        //                timeInterval = longTime;
-        //#if (!UNITY_EDITOR)
-        //                TakeScreenshot(nextRequestCause);
-        //#endif
-        //                // by default, request cause should always be regular processing
-        //                nextRequestCause = RequestCause.REGULAR;
-        //            }
-        //            // check for state 'image processing finished' more often to reduce waiting time
-        //            else
-        //            {
-        //                if (timeInterval != shortTime) timeInterval = shortTime;
-        //            }
-        //        }
-
+//        // process images every timeInterval seconds
+//#if (!UNITY_EDITOR)
+//        timeCounter += Time.deltaTime;
+//#endif
+//        if (timeCounter >= timeInterval)
+//        {
+//            timeCounter = 0;
+//            if (!processingScreenshot)
+//            {
+//                timeInterval = longTime;
+//#if (!UNITY_EDITOR)
+//                TakeScreenshot(nextRequestCause);
+//#endif
+//                // by default, request cause should always be regular processing
+//                nextRequestCause = RequestCause.REGULAR;
+//            }
+//            // check for state 'image processing finished' more often to reduce waiting time
+//            else
+//            {
+//                if (timeInterval != shortTime) timeInterval = shortTime;
+//            }
+//        }
     }
 
     /// <summary>
@@ -140,20 +135,28 @@ public class Controller : Singleton<Controller>
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
-            System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
-
-        // check for capacity of result queue
-        if (cameraPositionResultQueue.Count > 9)
+        if (e.Result == null || e.Result.Text == "")
         {
-            cameraPositionResultQueue.Dequeue();
+            if (currentRequestCause == RequestCause.USERINITIATED)
+            {
+                System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+            }
+        } 
+        else
+        {
+            // check for capacity of result queue
+            if (cameraPositionResultQueue.Count > 9)
+            {
+                cameraPositionResultQueue.Dequeue();
+            }
+
+            cameraPositionResultTemp.ocrResult = e.Result;
+            cameraPositionResultQueue.Enqueue(cameraPositionResultTemp);
+            displayText();
         }
 
-        cameraPositionResultTemp.ocrResult = e.Result;
-        cameraPositionResultQueue.Enqueue(cameraPositionResultTemp);
-        displayText();
-        processingScreenshot = false;
-        currentRequestCause = nextRequestCause;
+        //processingScreenshot = false;
+        //currentRequestCause = nextRequestCause;
     }
 
 
@@ -171,7 +174,8 @@ public class Controller : Singleton<Controller>
 
     public void RequestImageProcessing(RequestCause requestCause)
     {
-        nextRequestCause = requestCause;
+        //nextRequestCause = requestCause;
+        TakeScreenshot(requestCause);
     }
 
     public void displayText()

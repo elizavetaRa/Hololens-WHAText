@@ -250,50 +250,30 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         {
             var responseTemp = JsonConvert.DeserializeObject<MicrosoftAzureResult.RootObject>((string)response);
 
-            // Find bounding box coords which surround the entire recognized text block
-            float xMin, yMin, xMax, yMax;
-            xMin = yMin = xMax = yMax = 0;
-            float xMinTemp, yMinTemp, xMaxTemp, yMaxTemp;
-            string text = "";
-
-            for (int i = 0; i < responseTemp.regions.Count; i++)
+            if (responseTemp.regions.Count > 1)
             {
-                // convert string of bounding box numbers to int array
-                // pattern: boundingBox = [x, y, width, height]
-                string[] tmp = responseTemp.regions[i].boundingBox.Split(',');
-                int[] boundingBoxTemp = tmp.Select(s => Int32.Parse(s)).ToArray();
-
-                xMinTemp = boundingBoxTemp[0];
-                yMinTemp = boundingBoxTemp[1];
-                xMaxTemp = boundingBoxTemp[0] + boundingBoxTemp[2];
-                yMaxTemp = boundingBoxTemp[1] + boundingBoxTemp[3];
-
-                if (i == 0)
-                {
-                    xMin = xMinTemp;
-                    xMax = xMaxTemp;
-                    yMin = yMinTemp;
-                    yMax = yMaxTemp;
-                }
-                else
-                {
-                    if (xMinTemp < xMin) xMin = xMinTemp;
-                    if (xMaxTemp > xMax) xMax = xMaxTemp;
-                    if (yMinTemp < yMin) yMin = yMinTemp;
-                    if (yMaxTemp > yMax) yMax = yMaxTemp;
-                }
-
-                for (int j = 0; j < responseTemp.regions[i].lines.Count; j++)
-                {
-                    for (int k = 0; k < responseTemp.regions[i].lines[j].words.Count; k++)
-                    {
-                        text = text + " " + responseTemp.regions[i].lines[j].words[k].text;
-                    }
-                   
-                }
+                System.Diagnostics.Debug.WriteLine("More than one text block recognized. Taking first by default");
+                // TODO: Choose text block which is closer to intersection point of the camera raycast with the spatial net
             }
 
-            this.OcrResult = new OcrResult(text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
+            // saving entire text which is contained by the regions
+            string text = "";
+
+            // convert string of bounding box numbers to int array
+            // pattern: boundingBox = [x, y, width, height]
+            string[] tmp = responseTemp.regions[0].boundingBox.Split(',');
+            int[] boundingBoxTemp = tmp.Select(s => Int32.Parse(s)).ToArray();
+
+            for (int j = 0; j < responseTemp.regions[0].lines.Count; j++)
+            {
+                for (int k = 0; k < responseTemp.regions[0].lines[j].words.Count; k++)
+                {
+                    text = text + " " + responseTemp.regions[0].lines[j].words[k].text;
+                }
+                   
+            }
+
+            this.OcrResult = new OcrResult(text, new UnityEngine.Rect(boundingBoxTemp[0], boundingBoxTemp[1], boundingBoxTemp[2], boundingBoxTemp[3]));
         }
            
 

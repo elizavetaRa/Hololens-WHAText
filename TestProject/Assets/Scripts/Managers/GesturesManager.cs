@@ -47,7 +47,8 @@ public class GesturesManager: Singleton<GesturesManager> {
 
         // send event to Controller
 #if (!UNITY_EDITOR)
-        Controller.Instance.TakeScreenshot(RequestCause.USERINITIATED);
+        //Controller.Instance.TakeScreenshot(RequestCause.USERINITIATED);
+        Controller.Instance.RequestImageProcessing(RequestCause.USERINITIATED);
 #endif
 
     }

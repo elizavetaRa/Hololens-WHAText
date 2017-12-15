@@ -57,10 +57,10 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
     internal void visualizeText(CameraPositionResult cameraPositionResult)
     {
+        var ocrResult = cameraPositionResult.ocrResult;
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
         //var ocrResult = new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
-        var ocrResult = cameraPositionResult.ocrResult;
         var centerX = ocrResult.BoundingBox.x + ocrResult.BoundingBox.width / 2;
         var centerY = ocrResult.BoundingBox.y + ocrResult.BoundingBox.height / 2;
         var headPosition = Camera.main.transform.position;
