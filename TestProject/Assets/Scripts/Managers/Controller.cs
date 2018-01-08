@@ -169,15 +169,16 @@ public class Controller : Singleton<Controller>
         screenshotManager.TakeScreenshot();
     }
 
-  
-#endif
-
+    
     public void RequestImageProcessing(RequestCause requestCause)
     {
         //nextRequestCause = requestCause;
         TakeScreenshot(requestCause);
     }
 
+  
+#endif
+    
     public void displayText()
     {
         var size = cameraPositionResultQueue.Count;
