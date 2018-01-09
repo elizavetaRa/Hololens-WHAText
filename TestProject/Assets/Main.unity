@@ -108,6 +108,52 @@ NavMeshSettings:
     tileSize: 256
     accuratePlacement: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &82245460
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 7.5002003
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_RootOrder
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4371275215548792, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &131445387
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,7 +416,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7736b80bf17c7274098b22c224155ed1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textArea: {fileID: 1695887863783900, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
+  textArea: {fileID: 1130933878557036, guid: 873cf70f90fe7a743b0fcbf00760ea44, type: 2}
 --- !u!114 &1383684482
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -103,7 +103,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
             GameObject newArea = Instantiate(textArea);
             TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
-            visualText.text = ocrResult.Text;
+            //visualText.text = ocrResult.Text;
             newArea.transform.position = hitInfo.point; //new Vector3(headPosition.x, headPosition.y, headPosition.z + 3);
 
             Quaternion toQuat = Camera.main.transform.localRotation;
