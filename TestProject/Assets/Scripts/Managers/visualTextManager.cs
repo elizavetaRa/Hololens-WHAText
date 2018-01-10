@@ -3,14 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using HoloToolkit.Unity.InputModule;
+
 public class VisualTextManager : Singleton<VisualTextManager>
 {
     
     public GameObject textArea;
     //public GameObject LineRenderer;
+    private GazeManager gazeManager;
     // Use this for initialization
     void Start()
     {
+        gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
         //visualizeText(dummy);
     }
 
@@ -18,7 +22,17 @@ public class VisualTextManager : Singleton<VisualTextManager>
     // Update is called once per frame
     void Update()
     {
+        GameObject focusedObject = gazeManager.HitObject;
+        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag == "textArea")
+        {
+            callTextArea(focusedObject);
+        }
 
+    }
+
+   internal void callTextArea(GameObject focusedObject)
+    {
+        focusedObject.SendMessageUpwards("OnFocused", SendMessageOptions.DontRequireReceiver);
     }
 
 
