@@ -25,7 +25,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     bool screenshotsTakeable = false;
 
     public event EventHandler<QueryPhotoEventArgs> ScreenshotTaken;
-    public event EventHandler<bool> ScreenshotsTakeable;
+    //public event EventHandler<bool> ScreenshotsTakeable;
 
     // Use this for initialization
     void Start()
@@ -90,7 +90,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         if (result.success)
         {
             Debug.Log("Photo Mode started");
-            ScreenshotsTakeable?.Invoke(this, result.success);
+           // ScreenshotsTakeable?.Invoke(this, result.success);
         }
         else
         {
@@ -98,50 +98,50 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
     }
 
-    //internal void TakeScreenshot()
-    //{
-        
+    internal void TakeScreenshot()
+    {
 
-    //    // Create a PhotoCapture object
-    //    //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-    //    PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
-    //    {
-           
-    //        // Activate the web camera
-    //        photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
-    //        {
-    //            if (result.success)
-    //            {
-    //                // Take a screenshot
-    //                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-    //            }
-    //            else
-    //            {
-    //                // try to capture a photograph if photo mode was already started before
-    //                if (WebCam.Mode == WebCamMode.PhotoMode)
-    //                {
-    //                    try
-    //                    {
-    //                        photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-    //                    }
-    //                    catch
-    //                    {
-    //                        Debug.LogError("Photo mode was already started but capturing did not succeed.");
-    //                    }
 
-    //                }
-    //                else
-    //                {
-    //                    // use standard photograph if using photo mode did not succeed
-    //                    Debug.LogError("Unable to start photo mode!");
-    //                }
-    //            }
-    //        });
-    //    });
+        // Create a PhotoCapture object
+        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
+        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
+        {
 
-    //}
+            // Activate the web camera
+            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
+            {
+                if (result.success)
+                {
+                    // Take a screenshot
+                    photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+                }
+                else
+                {
+                    // try to capture a photograph if photo mode was already started before
+                    if (WebCam.Mode == WebCamMode.PhotoMode)
+                    {
+                        try
+                        {
+                            photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+                        }
+                        catch
+                        {
+                            Debug.LogError("Photo mode was already started but capturing did not succeed.");
+                        }
 
-	//wenn screenshot is captured to memory
+                    }
+                    else
+                    {
+                        // use standard photograph if using photo mode did not succeed
+                        Debug.LogError("Unable to start photo mode!");
+                    }
+                }
+            });
+        });
+
+    }
+
+    //wenn screenshot is captured to memory
     void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
     {
         
@@ -189,7 +189,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
     {
         // send event if there are subscribers
-        ScreenshotTaken?.Invoke(this, e);
+        //ScreenshotTaken?.Invoke(this, e);
     }
 
 

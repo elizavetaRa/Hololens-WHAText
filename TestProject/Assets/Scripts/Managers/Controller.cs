@@ -159,14 +159,14 @@ public class Controller : Singleton<Controller>
 
 #if (!UNITY_EDITOR)
 
-    //public async Task TakeScreenshot(RequestCause requestCause)
-    //{
-    //    //processingScreenshot = true;
-    //    //this.currentRequestCause = requestCause;
-    //    screenshotManager.TakeScreenshot();
-    //}
+    public async Task TakeScreenshot(RequestCause requestCause)
+    {
+        //processingScreenshot = true;
+        //this.currentRequestCause = requestCause;
+        screenshotManager.TakeScreenshot();
+    }
 
-  
+
 #endif
 
     public void RequestImageProcessing(RequestCause requestCause)
