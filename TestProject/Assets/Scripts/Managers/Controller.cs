@@ -41,6 +41,8 @@ public class Controller : Singleton<Controller>
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
 
+    CameraPositionResult cameraPositionResultTmp;
+
     // stack of 10 latest camera positions, ocrResults
     Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
 
@@ -114,26 +116,20 @@ public class Controller : Singleton<Controller>
         //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
 
         // store last 10 camera positions to queue of cemera position results
-        CameraPositionResult cameraPositionResult = new CameraPositionResult();
+        cameraPositionResultTmp = new CameraPositionResult();
 
         Debug.LogError("Screenshot taken.");
 
 
         //cameraPositionResult.cameraPosition = cameraPosition;
         //cameraPositionResult.cameraRotation = cameraRotation;
-        cameraPositionResult.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
+        cameraPositionResultTmp.cameraToWorldMatrix = e.CameraToWorldMatrix;
+        cameraPositionResultTmp.projectionMatrix = e.ProjectionMatrix;
 
         if (cameraPositionResultQueue.Count > 9)
         {
             cameraPositionResultQueue.Dequeue();
         }
-
-        cameraPositionResultQueue.Enqueue(cameraPositionResult);
-
-
-            this.displayText();
-        
 
         //start analyzing image
         switch (currentRequestCause)
@@ -153,6 +149,12 @@ public class Controller : Singleton<Controller>
     {
         if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+        else
+        {
+            cameraPositionResultTmp.ocrResult = e.Result;
+            cameraPositionResultQueue.Enqueue(cameraPositionResultTmp);
+            this.displayText();
+        }
 
         processingScreenshot = false;
         currentRequestCause = nextRequestCause;

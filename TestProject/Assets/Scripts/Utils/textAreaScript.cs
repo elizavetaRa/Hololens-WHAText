@@ -19,14 +19,14 @@ public class textAreaScript : MonoBehaviour {
 
     void OnFocused()
     {
-        Debug.Log(textPrefab.text);
+       // Debug.Log(textPrefab.text);
         //textAreaBox.transform.localScale = textAreaBoxSize;
         textAreaBox.GetComponent<SpriteRenderer>().color = Color.blue;
     }
     void OnDefocused()
     {
         //textAreaBox.transform.localScale = new Vector3(0,0,0);
-        Debug.Log("DEFOCUS");
+       
         textAreaBox.GetComponent<SpriteRenderer>().color = Color.red;
     }
 
