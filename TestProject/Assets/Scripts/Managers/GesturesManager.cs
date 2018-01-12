@@ -1,4 +1,5 @@
 using HoloToolkit.Unity;
+using HoloToolkit.Unity.InputModule;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +16,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     /// recognizes user's air tap
     /// </summary>
     private GestureRecognizer gestureRecognizer;
-
+    private GazeManager gazeManager;
     // Use this for initialization
     void Start()
     {
@@ -27,7 +28,7 @@ public class GesturesManager: Singleton<GesturesManager> {
         gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
         gestureRecognizer.TappedEvent += OnTap;
         gestureRecognizer.StartCapturingGestures();
-
+        gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
 
     }
 
@@ -43,6 +44,12 @@ public class GesturesManager: Singleton<GesturesManager> {
 
         // send log message and set waiting mode
         System.Diagnostics.Debug.WriteLine("Tap was recognized.");
+        GameObject clickedObject = gazeManager.HitObject;
+        if (clickedObject != null && clickedObject.tag == "textArea")
+        {
+            clickedObject.SendMessageUpwards("OnClick", SendMessageOptions.DontRequireReceiver);
+        }
+
 
         // send event to Controller
 #if (!UNITY_EDITOR)

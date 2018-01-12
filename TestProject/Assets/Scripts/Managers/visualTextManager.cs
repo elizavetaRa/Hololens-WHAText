@@ -11,10 +11,14 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public GameObject textArea;
     //public GameObject LineRenderer;
     private GazeManager gazeManager;
+    private GameObject currentlyFocused;
+    private GameObject dummy;
     // Use this for initialization
     void Start()
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
+        dummy = new GameObject();
+        currentlyFocused = dummy;
         //visualizeText(dummy);
     }
 
@@ -23,16 +27,28 @@ public class VisualTextManager : Singleton<VisualTextManager>
     void Update()
     {
         GameObject focusedObject = gazeManager.HitObject;
-        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag == "textArea")
+        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag == "textArea" && focusedObject != currentlyFocused)
         {
-            callTextArea(focusedObject);
+            Debug.Log("found!");
+            focusTextArea(focusedObject);
         }
+
+
+
+
 
     }
 
-   internal void callTextArea(GameObject focusedObject)
+    internal void focusTextArea(GameObject focusedObject)
     {
+        currentlyFocused = focusedObject;
         focusedObject.SendMessageUpwards("OnFocused", SendMessageOptions.DontRequireReceiver);
+    }
+    internal void deFocusTextArea(GameObject deFocusedObject)
+    {
+        Debug.Log("call");
+        currentlyFocused = dummy;
+        deFocusedObject.SendMessageUpwards("OnDefocused", SendMessageOptions.DontRequireReceiver);
     }
 
 
