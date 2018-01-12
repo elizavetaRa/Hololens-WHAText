@@ -3,6 +3,7 @@ using HoloToolkit.Unity;
 using System;
 using System.Linq;
 using UnityEngine.VR.WSA.WebCam;
+using System.Collections.Generic;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
 #endif
@@ -11,21 +12,24 @@ using System.Threading.Tasks;
 
 ///Demonstrates how to take a photo using the PhotoCapture functionality and display it on a Unity GameObject.
 /// <summary> Class responsible for taking screenshots </summary>
-public class ScreenshotManager: Singleton<ScreenshotManager> {
+public class ScreenshotManager : Singleton<ScreenshotManager> {
 
     /// <summary> object that performs the photo capture </summary>
     PhotoCapture photoCaptureObject;
 
     Resolution cameraResolution;
     CameraParameters cameraParameters;
+    Matrix4x4 cameraToWorldMatrix, projectionMatrix;
 
-    Texture2D targetTexture;
+    Texture2D imageAsTexture;
     // Renderer quadRenderer;
 
     bool screenshotsTakeable = false;
+    float lastTime = 0;
+    int photoCount = 0;
 
-    public event EventHandler<QueryPhotoEventArgs> ScreenshotTaken;
-    public event EventHandler<bool> ScreenshotsTakeable;
+    public event EventHandler ScreenshotTaken;
+    public event EventHandler<CameraReadyEventArgs> ScreenshotsTakeable;
 
     // Use this for initialization
     void Start()
@@ -35,7 +39,7 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
 
         PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 
-        targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
+        imageAsTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
     }
 
     void Update()
@@ -90,7 +94,13 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         if (result.success)
         {
             Debug.Log("Photo Mode started");
-            ScreenshotsTakeable?.Invoke(this, result.success);
+            screenshotsTakeable = true;
+
+            // send event if there are subscribers
+            CameraReadyEventArgs args = new CameraReadyEventArgs();
+            args.cameraReady = true;
+            var handler = ScreenshotsTakeable;
+            if (handler != null) handler.Invoke(this, args);
         }
         else
         {
@@ -98,76 +108,51 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
         }
     }
 
-    //internal void TakeScreenshot()
-    //{
-        
-
-    //    // Create a PhotoCapture object
-    //    //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-    //    PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
-    //    {
-           
-    //        // Activate the web camera
-    //        photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
-    //        {
-    //            if (result.success)
-    //            {
-    //                // Take a screenshot
-    //                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-    //            }
-    //            else
-    //            {
-    //                // try to capture a photograph if photo mode was already started before
-    //                if (WebCam.Mode == WebCamMode.PhotoMode)
-    //                {
-    //                    try
-    //                    {
-    //                        photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-    //                    }
-    //                    catch
-    //                    {
-    //                        Debug.LogError("Photo mode was already started but capturing did not succeed.");
-    //                    }
-
-    //                }
-    //                else
-    //                {
-    //                    // use standard photograph if using photo mode did not succeed
-    //                    Debug.LogError("Unable to start photo mode!");
-    //                }
-    //            }
-    //        });
-    //    });
-
-    //}
-
-	//wenn screenshot is captured to memory
+	// When screenshot is captured to memory
     void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
     {
-        
 		if (result.success)
         {
             // play photo capture sound
             //Camera.main.GetComponent<AudioSource>().Play();
 
             // save photograph to texture
-            Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
-            photoCaptureFrame.UploadImageDataToTexture(screenshot);
+            imageAsTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
+            photoCaptureFrame.UploadImageDataToTexture(imageAsTexture);
 
             // position of camera/user at time of capturing screenshot
-            var cameraToWorldMatrix = new Matrix4x4();
-            var projectionMatrix = new Matrix4x4();
-
             photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
             photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
 
+            if (lastTime == 0)
+            {
+                lastTime = Time.time;
+            }
+            if (Time.time - lastTime < 1.0f)
+            {
+                photoCount++;
+            }
+            else
+            {
+                Debug.LogError("Photos per s: " + photoCount);
+                lastTime = Time.time;
+                photoCount = 0;
+            }
+
             // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix, projectionMatrix));
+            OnScreenshotTaken();
         }
 
         this.screenshotsTakeable = true;
         // Deactivate web camera
         //photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+    }
+
+    public void GetLatestPicture(out Texture2D picture, out Matrix4x4 cameraToWorldMatrix, out Matrix4x4 projectionMatrix)
+    {
+        picture = this.imageAsTexture;
+        cameraToWorldMatrix = this.cameraToWorldMatrix;
+        projectionMatrix = this.projectionMatrix;
     }
 
 	
@@ -186,15 +171,21 @@ public class ScreenshotManager: Singleton<ScreenshotManager> {
     /// called whenever a screenshot has been taken
     /// </summary>
     /// <param name="e"></param>
-    protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
+    protected virtual void OnScreenshotTaken()
     {
         // send event if there are subscribers
-        ScreenshotTaken?.Invoke(this, e);
+        var handler = ScreenshotTaken;
+        if (handler != null) handler.Invoke(this, new EventArgs());
     }
 
 
 }
 
+
+public class CameraReadyEventArgs : EventArgs
+{
+    public bool cameraReady { get; set; }
+}
 
 public class QueryPhotoEventArgs : EventArgs
 {
@@ -202,9 +193,8 @@ public class QueryPhotoEventArgs : EventArgs
     /// constructor for the photo capture event parameters
     /// </summary>
     /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix, Matrix4x4 projectionMatrix)
+    public QueryPhotoEventArgs(Matrix4x4 cameraToWorldMatrix, Matrix4x4 projectionMatrix)
     {
-        ScreenshotAsTexture = texture;
         CameraToWorldMatrix = cameraToWorldMatrix;
         ProjectionMatrix = projectionMatrix;
        

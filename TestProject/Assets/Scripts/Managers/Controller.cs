@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 using System.Linq;
+using System.Runtime.InteropServices;
 #if (!UNITY_EDITOR)
 using System.Threading.Tasks;
 using UnityEngine;
@@ -34,8 +35,12 @@ public class Controller : Singleton<Controller>
     private const float shortTime = .1F;
 
     private RequestCause currentRequestCause, nextRequestCause;
+    IntPtr imagePointer;
+    byte[] imageData;
+    int imageWidth, imageHeight;
 
     private bool processingScreenshot;
+    CameraPositionResult cameraPositionResultTemp;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
@@ -51,7 +56,6 @@ public class Controller : Singleton<Controller>
     /// </summary>
     void Start()
     {
-
         // link managers
         apiManager = ApiManager.Instance;
         screenshotManager = ScreenshotManager.Instance;
@@ -60,6 +64,7 @@ public class Controller : Singleton<Controller>
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
+        gesturesManager.Tapped += onTapped;
 
         processingScreenshot = false;
         timeCounter = 0;
@@ -104,47 +109,58 @@ public class Controller : Singleton<Controller>
     /// </summary>
     /// <param name="sender"> the sender of the event </param>
     /// <param name="e"> the photograph event parameters </param>
-    private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
+    private void OnScreenshotTaken(object sender, EventArgs e)
     {
 #if (!UNITY_EDITOR)
+        // Save pointer for latest picture taken
+        screenshotManager.GetLatestPicture(out imageWidth, out imageHeight, out imagePointer, out imageData);
 
-        //recalculate Camera to World Matrix to position and rotation
+        //Texture2D screenshotAsTexture = new Texture2D(imageWidth, imageHeight, TextureFormat.RGBA32, false);
+
+        //screenshotAsTexture.LoadRawTextureData(imageData);
+        //screenshotAsTexture.Apply();
+
+        //// recalculate Camera to World Matrix to position and rotation
         //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
         //cameraRotation = Quaternion.LookRotation(-e.CameraToWorldMatrix.GetColumn(2), e.CameraToWorldMatrix.GetColumn(1));
-        //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
 
-        // store last 10 camera positions to queue of cemera position results
-        CameraPositionResult cameraPositionResult = new CameraPositionResult();
-
-
-        //cameraPositionResult.cameraPosition = cameraPosition;
-        //cameraPositionResult.cameraRotation = cameraRotation;
-        cameraPositionResult.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
-
-        if (cameraPositionResultQueue.Count > 9)
-        {
-            cameraPositionResultQueue.Dequeue();
-        }
-
-        cameraPositionResultQueue.Enqueue(cameraPositionResult);
+        //// store last 10 camera positions to queue of cemera position results
+        //cameraPositionResultTemp = new CameraPositionResult();
 
 
-            this.displayText();
-        
+        ////cameraPositionResult.cameraPosition = cameraPosition;
+        ////cameraPositionResult.cameraRotation = cameraRotation;
+        //cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
+        //cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
 
-        //start analyzing image
-        switch (currentRequestCause)
-        {
-            case RequestCause.REGULAR:
-                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
-                break;
-            case RequestCause.USERINITIATED:
-                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
-                break;
-        }
+        //if (cameraPositionResultQueue.Count > 9)
+        //{
+        //    cameraPositionResultQueue.Dequeue();
+        //}
+
+        ////cameraPositionResultQueue.Enqueue(cameraPositionResult);
+
+
+        ////this.displayText();
+
+
+        ////start analyzing image
+        //switch (currentRequestCause)
+        //{
+        //    case RequestCause.REGULAR:
+        //        apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(screenshotAsTexture));
+        //        break;
+        //    case RequestCause.USERINITIATED:
+        //        apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(screenshotAsTexture));
+        //        break;
+        //}
 
 #endif
+    }
+
+    private void onTapped(object sender, TapEventArgs e)
+    {
+        this.currentRequestCause = e.RequestCause;
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
