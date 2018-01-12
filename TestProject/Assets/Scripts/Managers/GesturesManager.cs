@@ -1,4 +1,5 @@
 using HoloToolkit.Unity;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +16,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     /// recognizes user's air tap
     /// </summary>
     private GestureRecognizer gestureRecognizer;
+    public event EventHandler<TapEventArgs> Tapped;
 
     // Use this for initialization
     void Start()
@@ -46,12 +48,17 @@ public class GesturesManager: Singleton<GesturesManager> {
 
         // send event to Controller
 #if (!UNITY_EDITOR)
-        Controller.Instance.TakeScreenshot(RequestCause.USERINITIATED);
+        TapEventArgs args = new TapEventArgs();
+        args.RequestCause = RequestCause.USERINITIATED;
+        var handler = Tapped;
+        if (handler != null) handler.Invoke(this, args);
 #endif
 
     }
 
+}
 
-
-
+public class TapEventArgs : EventArgs
+{
+    public RequestCause RequestCause { get; set; }
 }
