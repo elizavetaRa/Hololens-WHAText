@@ -122,31 +122,31 @@ public class VisualTextManager : Singleton<VisualTextManager>
             visualText.text = "Text"; //ocrResult.Text;
 
             //set Position
-            newArea.transform.position = hitInfo.point;
+            newArea.transform.position = headPosition;// hitInfo.point;
             
             //set Rotation
             Quaternion toQuat = Camera.main.transform.localRotation;
             toQuat.x = 0;
             toQuat.z = 0;
             newArea.transform.rotation = toQuat;
-            Debug.Log(ocrResult.BoundingBox);
+            //Debug.Log(ocrResult.BoundingBox);
 
             //set Size
-            //Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
-            //float targetWidth = ocrResult.BoundingBox.width;
-            //float targetHeight = ocrResult.BoundingBox.height;
-            //float currentWidth = textAreaBox.size.x;
-            //float currentHeight = textAreaBox.size.y;
-            //Vector3 scale = newArea.transform.localScale;
-            //scale.x = targetWidth * scale.x / currentWidth;
-            //scale.y = targetHeight * scale.y / currentHeight;
+            Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
+            float targetWidth = ocrResult.BoundingBox.width;
+            float targetHeight = ocrResult.BoundingBox.height;
+            float currentWidth = textAreaBox.size.x;
+            float currentHeight = textAreaBox.size.y;
+            Vector3 scale = newArea.transform.localScale;
+            Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight);
+            Debug.Log("currentWidth " + currentWidth + " ; currentHeight " + currentHeight);
+            //Debug.Log("scale.x " + scale.x + " ; scale.y " + scale.y);
+            scale.x = targetWidth * scale.x / currentWidth;
+            scale.y = targetHeight * scale.y / currentHeight;
             //newArea.transform.localScale = scale;
-            //Debug.Log("targetwidth " + targetWidth);
-            //Debug.Log("targetHeight " + targetHeight);
-            //Debug.Log("width " + currentWidth);
-            //Debug.Log("height " + currentHeight);
-            //Debug.Log("scale.x " + scale.x);
-            //Debug.Log("scale.y " + scale.y);
+
+            //Debug.Log("scale.x after: " + scale.x);
+            //Debug.Log("scale.y after: " + scale.y);
         }
     }
     public static Vector3 UnProjectVector(Matrix4x4 proj, Vector3 to)
