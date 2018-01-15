@@ -147,9 +147,9 @@ public class Controller : Singleton<Controller>
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
-            System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
-        else
+        //if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
+            //System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+        if (e.Result != null && e.Result.Text != "")
         {
             cameraPositionResultTmp.ocrResult = e.Result;
             cameraPositionResultQueue.Enqueue(cameraPositionResultTmp);

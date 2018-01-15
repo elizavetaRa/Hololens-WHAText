@@ -1,4 +1,5 @@
-﻿using HoloToolkit.Unity;
+﻿
+using HoloToolkit.Unity;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,18 +8,22 @@ using HoloToolkit.Unity.InputModule;
 
 public class VisualTextManager : Singleton<VisualTextManager>
 {
-    
+
     public GameObject textArea;
     //public GameObject LineRenderer;
     private GazeManager gazeManager;
     private GameObject currentlyFocused;
     private GameObject dummy;
+    private FocusManager focusManager;
     // Use this for initialization
     void Start()
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
+        focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
         dummy = new GameObject();
         currentlyFocused = dummy;
+        //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
+        focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
         //visualizeText(dummy);
     }
 
@@ -26,29 +31,39 @@ public class VisualTextManager : Singleton<VisualTextManager>
     // Update is called once per frame
     void Update()
     {
-        GameObject focusedObject = gazeManager.HitObject;
-        if (focusedObject != null && focusedObject.tag != null && focusedObject.tag == "textArea" && focusedObject != currentlyFocused)
+        //GameObject focusedObject = gazeManager.HitObject;
+        //if (focusedObject != null && focusedObject.tag != null && focusedObject.tag == "textArea" && focusedObject != currentlyFocused)
+        //{
+        //   // Debug.Log("found!");
+        //    focusTextArea(focusedObject);
+        //}
+
+    }
+
+    //internal void focusTextArea(GameObject focusedObject)
+    //{
+    //    currentlyFocused = focusedObject;
+    //    focusedObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
+    //}
+    //internal void deFocusTextArea(GameObject deFocusedObject)
+    //{
+    //    //Debug.Log("call");
+    //    currentlyFocused = dummy;
+    //    deFocusedObject.SendMessageUpwards("OnDefocus", SendMessageOptions.DontRequireReceiver);
+    //}
+
+    static void focusChanged(IPointingSource pointer, GameObject oldObject, GameObject newObject)
+    {
+        if(oldObject != null)
         {
-           // Debug.Log("found!");
-            focusTextArea(focusedObject);
+
+            oldObject.SendMessageUpwards("OnDefocus", SendMessageOptions.DontRequireReceiver);
         }
-
-
-
-
-
-    }
-
-    internal void focusTextArea(GameObject focusedObject)
-    {
-        currentlyFocused = focusedObject;
-        focusedObject.SendMessageUpwards("OnFocused", SendMessageOptions.DontRequireReceiver);
-    }
-    internal void deFocusTextArea(GameObject deFocusedObject)
-    {
-        //Debug.Log("call");
-        currentlyFocused = dummy;
-        deFocusedObject.SendMessageUpwards("OnDefocused", SendMessageOptions.DontRequireReceiver);
+        if (newObject != null)
+        {
+            newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
+        }
+        //newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
     }
 
 
@@ -100,7 +115,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
         Vector2 ImagePosZeroToOne = new Vector2(ocrResult.BoundingBox.x / ImageWidth, 1.0f - (ocrResult.BoundingBox.y / ImageHeight));
         Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
-        
+
         Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
 
         //Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1)); // camera location in world space
@@ -119,11 +134,11 @@ public class VisualTextManager : Singleton<VisualTextManager>
             TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
 
             //set Text
-            visualText.text = "Text"; //ocrResult.Text;
+            visualText.text = ocrResult.Text;
 
             //set Position
-            newArea.transform.position = headPosition;// hitInfo.point;
-            
+            newArea.transform.position = hitInfo.point;
+
             //set Rotation
             Quaternion toQuat = Camera.main.transform.localRotation;
             toQuat.x = 0;
@@ -132,7 +147,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //Debug.Log(ocrResult.BoundingBox);
 
             //set Size
-            Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
+            Bounds textAreaBox = newArea.GetComponent<BoxCollider>().bounds;   //.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
+     
+            //theSprite.OverrideGeometry();
             float targetWidth = ocrResult.BoundingBox.width;
             float targetHeight = ocrResult.BoundingBox.height;
             float currentWidth = textAreaBox.size.x;
@@ -140,14 +157,21 @@ public class VisualTextManager : Singleton<VisualTextManager>
             Vector3 scale = newArea.transform.localScale;
             Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight);
             Debug.Log("currentWidth " + currentWidth + " ; currentHeight " + currentHeight);
-            //Debug.Log("scale.x " + scale.x + " ; scale.y " + scale.y);
+            Debug.Log("scale.x " + scale.x + " ; scale.y " + scale.y);
             scale.x = targetWidth * scale.x / currentWidth;
             scale.y = targetHeight * scale.y / currentHeight;
             //newArea.transform.localScale = scale;
 
-            //Debug.Log("scale.x after: " + scale.x);
-            //Debug.Log("scale.y after: " + scale.y);
+            Debug.Log("scale.x after: " + scale.x + " ; scale.y after: " + scale.y);
         }
+    }
+
+
+    public Vector3[] convert2DtoWorld(float x, float y, float imageWidth, float imageHeight )
+    {
+        Vector3[] result = new Vector3[2];
+
+        return result;
     }
     public static Vector3 UnProjectVector(Matrix4x4 proj, Vector3 to)
     {
