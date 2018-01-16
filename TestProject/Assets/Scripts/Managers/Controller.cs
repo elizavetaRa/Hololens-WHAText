@@ -36,14 +36,18 @@ public class Controller : Singleton<Controller>
     private RequestCause currentRequestCause, nextRequestCause;
 
     private bool processingScreenshot;
+    private CameraPositionResult cameraPositionResultTemp;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
 
-    // stack of 10 latest camera positions, ocrResults
-    Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
+    private int currentId;
 
+    // stack of 10 latest camera positions, ocrResults
+    //Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
+    List<CameraPositionResult> regularCameraPositionResultList = new List<CameraPositionResult>();
+    List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
 
 
     /// <summary>
@@ -68,34 +72,13 @@ public class Controller : Singleton<Controller>
         currentRequestCause = RequestCause.REGULAR;
         nextRequestCause = RequestCause.REGULAR;
 
-        //repeating capturing screenshots function starts in 1s every 0.5s
-        //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
+        cameraPositionResultTemp = new CameraPositionResult();
+
+        currentId = 0;
     }
 
     void Update()
     {
-        //        // process images every timeInterval seconds
-        //#if (!UNITY_EDITOR)
-        //        timeCounter += Time.deltaTime;
-        //#endif
-        //        if (timeCounter >= timeInterval)
-        //        {
-        //            timeCounter = 0;
-        //            if (!processingScreenshot)
-        //            {
-        //                timeInterval = longTime;
-        //#if (!UNITY_EDITOR)
-        //                TakeScreenshot(nextRequestCause);
-        //#endif
-        //                // by default, request cause should always be regular processing
-        //                nextRequestCause = RequestCause.REGULAR;
-        //            }
-        //            // check for state 'image processing finished' more often to reduce waiting time
-        //            else
-        //            {
-        //                if (timeInterval != shortTime) timeInterval = shortTime;
-        //            }
-        //        }
 
     }
 
@@ -108,30 +91,37 @@ public class Controller : Singleton<Controller>
     {
 #if (!UNITY_EDITOR)
 
-        //recalculate Camera to World Matrix to position and rotation
-        //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
-        //cameraRotation = Quaternion.LookRotation(-e.CameraToWorldMatrix.GetColumn(2), e.CameraToWorldMatrix.GetColumn(1));
-        //System.Diagnostics.Debug.WriteLine(" camera position, rotation " + cameraPosition + cameraRotation);
+        cameraPositionResultTemp = new CameraPositionResult();
+        cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
+        cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
 
-        // store last 10 camera positions to queue of cemera position results
-        CameraPositionResult cameraPositionResult = new CameraPositionResult();
-
-
-        //cameraPositionResult.cameraPosition = cameraPosition;
-        //cameraPositionResult.cameraRotation = cameraRotation;
-        cameraPositionResult.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        cameraPositionResult.projectionMatrix = e.ProjectionMatrix;
-
-        if (cameraPositionResultQueue.Count > 9)
+        //id
+        switch (currentRequestCause)
         {
-            cameraPositionResultQueue.Dequeue();
+            case RequestCause.REGULAR:
+
+                if (regularCameraPositionResultList.Count > 9)
+                {
+                    regularCameraPositionResultList.RemoveAt(0);
+                }
+
+                cameraPositionResultTemp.id = currentId;
+                regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTemp);
+
+                break;
+            case RequestCause.USERINITIATED:
+
+                if (initiatedCameraPositionResultList.Count > 9)
+                {
+                    initiatedCameraPositionResultList.RemoveAt(0);
+                }
+                cameraPositionResultTemp.id = currentId;
+                initiatedCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTemp);
+
+
+                break;
         }
 
-        cameraPositionResultQueue.Enqueue(cameraPositionResult);
-
-
-            this.displayText();
-        
 
         //start analyzing image
         switch (currentRequestCause)
@@ -148,36 +138,86 @@ public class Controller : Singleton<Controller>
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
-            System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+        if (e.Result == null || e.Result.Text == "")
+        {
+            if (currentRequestCause == RequestCause.USERINITIATED)
+            {
+                System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
 
-        processingScreenshot = false;
-        currentRequestCause = nextRequestCause;
+                initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+
+            } else
+            {
+                regularCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+            }
+        }
+        else
+        {
+            // check for capacity of result list
+
+            switch (currentRequestCause)
+            {
+                case RequestCause.REGULAR:
+
+                    for (int i = 0; i < regularCameraPositionResultList.Count; i++)
+                    {
+                        if (regularCameraPositionResultList[i].id == currentId)
+                        {
+                            regularCameraPositionResultList[i].ocrResult = e.Result;
+                            currentId++;
+                            break;
+                        }
+                    }
+
+                    break;
+                case RequestCause.USERINITIATED:
+                    for (int i = 0; i < initiatedCameraPositionResultList.Count; i++)
+                    {
+                        if (initiatedCameraPositionResultList[i].id == currentId)
+                        {
+                            initiatedCameraPositionResultList[i].ocrResult = e.Result;
+                             currentId++;
+                            break;
+                        }                                             
+                    }                 
+                    break;    
+            }
+
+            //currentId++;
+            
+            displayText();
+        }
+
+        //processingScreenshot = false;
+        //currentRequestCause = nextRequestCause;
     }
 
 
 #if (!UNITY_EDITOR)
 
-    public async Task TakeScreenshot(RequestCause requestCause)
+    public void TakeScreenshot(RequestCause requestCause)
     {
         //processingScreenshot = true;
-        //this.currentRequestCause = requestCause;
+        this.currentRequestCause = requestCause;
         screenshotManager.TakeScreenshot();
     }
 
-  
-#endif
 
     public void RequestImageProcessing(RequestCause requestCause)
     {
-        nextRequestCause = requestCause;
+        //nextRequestCause = requestCause;
+
+        TakeScreenshot(requestCause);
     }
+
+
+#endif
 
     public void displayText()
     {
-        var size = cameraPositionResultQueue.Count;
+        var size = regularCameraPositionResultList.Count;
 
-        visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size - 1));
+        visualTextManager.visualizeText(regularCameraPositionResultList.ElementAt(size - 1));
 
     }
 
@@ -189,3 +229,4 @@ public enum RequestCause
     REGULAR,
     USERINITIATED,
 }
+
