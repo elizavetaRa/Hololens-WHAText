@@ -6,11 +6,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Windows.Globalization;
-#else
 using UnityEngine;
+using Windows.Globalization;
 #endif
 
 /// <summary>
@@ -21,7 +19,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
     public delegate void OnGetDataCompleted(string id, string json);
     private static ApiMicrosoftAzureOcr instance = null;
     private string uri = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
-    public string apiKey = "0aecf5424f47414caabcf34def172d60";
+    public string apiKey = "d983dc900c4249c898cc0edacfebdd9c";
     // Number of Maximum Requests Until Fallback to Media.OCR 
     private int maxTries = 3;
     // Delay Time Between Request Sendings in ms
@@ -105,8 +103,6 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         else
             byteData = screenshot.AsJPEG;
 
-        //System.Diagnostics.Debug.WriteLine(" Picture height" + screenshot.AsTexture2D.height);
-
         using (ByteArrayContent content = new ByteArrayContent(byteData))
         {
             // Using octet-stream for local image location
@@ -119,7 +115,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
             {
                 try
                 {
-                    System.Diagnostics.Debug.WriteLine("Try Nr " + count);
+                    Debug.LogError("<AzureOCR> Try Nr " + count);
 
                     // Execute the REST API call.
                     response = await client.PostAsync(uri, content);
@@ -132,19 +128,19 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                     //System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
 
                     ParseResponseData(contentString);
-                    System.Diagnostics.Debug.WriteLine("AzureOCR: " + OcrResult.Text);
+                    Debug.LogError("<AzureOCR> " + OcrResult.Text);
                     break;
                 }
 
                 catch (HttpRequestException httpException)
                 {
-                    System.Diagnostics.Debug.WriteLine("Network Error. Falling back to local OCR");
+                    Debug.LogError("<AzureOCR> Network Error.");
                     throw new HttpRequestException("HTTP Request Error");
                 }
 
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine("Api Request Error: " + e);
+                    Debug.LogError("<AzureOCR> Api Request Error: " + e);
                     await Task.Delay(delay);
                     count++;
                 }
@@ -244,7 +240,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 #if (!UNITY_EDITOR)
         if ((string)response == "" || response == null)
         {
-            System.Diagnostics.Debug.WriteLine("No Text recognized");
+            Debug.LogError("<AzureOCR> No Text recognized");
         }
         else
         {

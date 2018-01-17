@@ -1,15 +1,12 @@
 ﻿#if (!UNITY_EDITOR)
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Globalization;
 using Windows.Media.Ocr;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
-using System.IO;
-using Windows.Storage.Streams;
-using System.Runtime.InteropServices.WindowsRuntime;
+using UnityEngine;
 #endif
 
 /// <summary>
@@ -39,7 +36,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             PreferredLang = AvailableLanguages[0];
         }
 
-        Debug.WriteLine("Api created with Language " + PreferredLang.DisplayName);
+        Debug.LogError("<MediaOCR> Api created with Language " + PreferredLang.DisplayName);
 #endif
     }
 
@@ -113,13 +110,13 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
         {
             for (var i = 0; i < OcrEngine.AvailableRecognizerLanguages.Count; i++)
             {
-                Debug.WriteLine("Supported: " + OcrEngine.AvailableRecognizerLanguages[i].DisplayName);
+                Debug.LogError("<MediaOCR> Supported: " + OcrEngine.AvailableRecognizerLanguages[i].DisplayName);
             }
             this.AvailableLanguages = OcrEngine.AvailableRecognizerLanguages;
         }
         else
         {
-            Debug.WriteLine("No Ocr Languages on Device available.");
+            Debug.LogError("<MediaOCR> No Ocr Languages on Device available.");
         }
     }
 
@@ -127,7 +124,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
     {
         if (!OcrEngine.IsLanguageSupported(lang))
         {
-            Debug.WriteLine("Language " + lang.DisplayName + " is not supported");
+            Debug.LogError("<MediaOCR> Language " + lang.DisplayName + " is not supported");
             return false;
         }
         return true;
@@ -144,7 +141,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
         if (bitmap.PixelWidth > OcrEngine.MaxImageDimension || bitmap.PixelHeight > OcrEngine.MaxImageDimension)
         {
-            Debug.WriteLine("Image Resolution not supported.");
+            Debug.LogError("<MediaOCR> Image Resolution not supported.");
         }
         else
         {
@@ -162,7 +159,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
         if (responseTemp.Text == "" || responseTemp.Text == null)
         {
-            Debug.WriteLine("MediaOCR: " + "No Text recognized");
+            Debug.LogError("<MediaOCR> " + "No Text recognized");
             this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
         }
         else
@@ -200,7 +197,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
             }
 
             this.OcrResult = new OcrResult(responseTemp.Text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
-            Debug.WriteLine("MediaOCR: " + this.OcrResult.Text);
+            Debug.LogError("<MediaOCR> " + this.OcrResult.Text);
         }
 #endif
     }
@@ -224,7 +221,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
     private async Task LoadSampleImageFromFile()
     {
-        System.Diagnostics.Debug.WriteLine(Windows.ApplicationModel.Package.Current.InstalledLocation);
+        Debug.LogError(Windows.ApplicationModel.Package.Current.InstalledLocation);
         var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
         await LoadImageFromFile(file);
     }

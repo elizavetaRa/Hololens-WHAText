@@ -1,16 +1,9 @@
 using HoloToolkit.Unity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using UnityEngine;
 using System.Linq;
-using System.Runtime.InteropServices;
 #if (!UNITY_EDITOR)
-using System.Threading.Tasks;
-using UnityEngine;
 #endif
 
 /// <summary> Singleton that is responsible for management of queries, pictures and keywords </summary>
@@ -39,12 +32,16 @@ public class Controller : Singleton<Controller>
     byte[] imageData;
     int imageWidth, imageHeight;
 
-    private bool processingScreenshot;
+    private bool analysingScreenshot;
     CameraPositionResult cameraPositionResultTemp;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
+
+    // temporarily saving data from the latest frame captured
+    Matrix4x4 cameraToWorldMatrixTmp, projectionMatrixTmp;
+    Texture2D imageAsTextureTmp;
 
     // stack of 10 latest camera positions, ocrResults
     Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
@@ -60,13 +57,14 @@ public class Controller : Singleton<Controller>
         apiManager = ApiManager.Instance;
         screenshotManager = ScreenshotManager.Instance;
         visualTextManager = VisualTextManager.Instance;
+        gesturesManager = GesturesManager.Instance;
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
         gesturesManager.Tapped += onTapped;
 
-        processingScreenshot = false;
+        analysingScreenshot = false;
         timeCounter = 0;
         timeInterval = 1;
 
@@ -79,29 +77,6 @@ public class Controller : Singleton<Controller>
 
     void Update()
     {
-        //        // process images every timeInterval seconds
-        //#if (!UNITY_EDITOR)
-        //        timeCounter += Time.deltaTime;
-        //#endif
-        //        if (timeCounter >= timeInterval)
-        //        {
-        //            timeCounter = 0;
-        //            if (!processingScreenshot)
-        //            {
-        //                timeInterval = longTime;
-        //#if (!UNITY_EDITOR)
-        //                TakeScreenshot(nextRequestCause);
-        //#endif
-        //                // by default, request cause should always be regular processing
-        //                nextRequestCause = RequestCause.REGULAR;
-        //            }
-        //            // check for state 'image processing finished' more often to reduce waiting time
-        //            else
-        //            {
-        //                if (timeInterval != shortTime) timeInterval = shortTime;
-        //            }
-        //        }
-
     }
 
     /// <summary>
@@ -112,13 +87,8 @@ public class Controller : Singleton<Controller>
     private void OnScreenshotTaken(object sender, EventArgs e)
     {
 #if (!UNITY_EDITOR)
-        // Save pointer for latest picture taken
-        screenshotManager.GetLatestPicture(out imageWidth, out imageHeight, out imagePointer, out imageData);
-
-        //Texture2D screenshotAsTexture = new Texture2D(imageWidth, imageHeight, TextureFormat.RGBA32, false);
-
-        //screenshotAsTexture.LoadRawTextureData(imageData);
-        //screenshotAsTexture.Apply();
+        // Save ref for latest picture taken
+        screenshotManager.GetLatestPicture(out imageAsTextureTmp, out cameraToWorldMatrixTmp, out projectionMatrixTmp);
 
         //// recalculate Camera to World Matrix to position and rotation
         //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
@@ -127,6 +97,10 @@ public class Controller : Singleton<Controller>
         //// store last 10 camera positions to queue of cemera position results
         //cameraPositionResultTemp = new CameraPositionResult();
 
+        ////cameraPositionResult.cameraPosition = cameraPosition;
+        ////cameraPositionResult.cameraRotation = cameraRotation;
+        //cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
+        //cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
 
         ////cameraPositionResult.cameraPosition = cameraPosition;
         ////cameraPositionResult.cameraRotation = cameraRotation;
@@ -144,23 +118,27 @@ public class Controller : Singleton<Controller>
         ////this.displayText();
 
 
-        ////start analyzing image
-        //switch (currentRequestCause)
-        //{
-        //    case RequestCause.REGULAR:
-        //        apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(screenshotAsTexture));
-        //        break;
-        //    case RequestCause.USERINITIATED:
-        //        apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(screenshotAsTexture));
-        //        break;
-        //}
+        //start analyzing image
+        analysingScreenshot = true;
 
+        switch (currentRequestCause)
+        {
+            case RequestCause.REGULAR:
+                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
+                break;
+            case RequestCause.USERINITIATED:
+                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
+                break;
+        }
+
+        currentRequestCause = this.nextRequestCause;
+        this.nextRequestCause = RequestCause.REGULAR;
 #endif
     }
 
     private void onTapped(object sender, TapEventArgs e)
     {
-        this.currentRequestCause = e.RequestCause;
+        this.nextRequestCause = e.RequestCause;
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
@@ -168,8 +146,7 @@ public class Controller : Singleton<Controller>
         if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
             System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
 
-        processingScreenshot = false;
-        currentRequestCause = nextRequestCause;
+        analysingScreenshot = false;
     }
 
 
@@ -184,11 +161,6 @@ public class Controller : Singleton<Controller>
 
   
 #endif
-
-    public void RequestImageProcessing(RequestCause requestCause)
-    {
-        nextRequestCause = requestCause;
-    }
 
     public void displayText()
     {
