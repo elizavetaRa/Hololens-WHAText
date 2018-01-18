@@ -1,15 +1,9 @@
 using HoloToolkit.Unity;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using UnityEngine;
 using System.Linq;
 #if (!UNITY_EDITOR)
-using System.Threading.Tasks;
-using UnityEngine;
 #endif
 
 /// <summary> Singleton that is responsible for management of queries, pictures and keywords </summary>
@@ -35,51 +29,61 @@ public class Controller : Singleton<Controller>
 
     private RequestCause currentRequestCause, nextRequestCause;
 
-    private bool processingScreenshot;
-    private CameraPositionResult cameraPositionResultTemp;
+    private bool analysingScreenshot;
+    private CameraPositionResult cameraPositionResultTmp;
+    private bool screenshotsTakeable;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
 
+    // temporarily saving data from the latest frame captured
+    private Matrix4x4 cameraToWorldMatrixTmp, projectionMatrixTmp;
+    private Texture2D imageAsTextureTmp;
+
     private int currentId;
 
     // stack of 10 latest camera positions, ocrResults
-    //Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
-    List<CameraPositionResult> regularCameraPositionResultList = new List<CameraPositionResult>();
-    List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
+    private List<CameraPositionResult> regularCameraPositionResultList = new List<CameraPositionResult>();
+    private List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
 
+    // list with selected words to build request
+    private List<String> selectedWordsList = new List<String>();
 
     /// <summary>
     /// called when the application is started
     /// </summary>
     void Start()
     {
-
         // link managers
         apiManager = ApiManager.Instance;
         screenshotManager = ScreenshotManager.Instance;
         visualTextManager = VisualTextManager.Instance;
+        gesturesManager = GesturesManager.Instance;
 
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
+        gesturesManager.Tapped += onTapped;
+        gesturesManager.DoubleTapped += onDoubleTapped;
 
-        processingScreenshot = false;
+        analysingScreenshot = false;
         timeCounter = 0;
         timeInterval = 1;
 
         currentRequestCause = RequestCause.REGULAR;
         nextRequestCause = RequestCause.REGULAR;
 
-        cameraPositionResultTemp = new CameraPositionResult();
+        screenshotsTakeable = true;
+
+
+        cameraPositionResultTmp = new CameraPositionResult();
 
         currentId = 0;
     }
 
     void Update()
     {
-
     }
 
     /// <summary>
@@ -87,68 +91,108 @@ public class Controller : Singleton<Controller>
     /// </summary>
     /// <param name="sender"> the sender of the event </param>
     /// <param name="e"> the photograph event parameters </param>
-    private void OnScreenshotTaken(object sender, QueryPhotoEventArgs e)
+    private void OnScreenshotTaken(object sender, EventArgs e)
     {
-#if (!UNITY_EDITOR)
+        // Save ref for latest picture taken
+        screenshotManager.GetLatestPicture(out imageAsTextureTmp, out cameraToWorldMatrixTmp, out projectionMatrixTmp);
 
-        cameraPositionResultTemp = new CameraPositionResult();
-        cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
-
-        //id
-        switch (currentRequestCause)
-        {
-            case RequestCause.REGULAR:
-
-                if (regularCameraPositionResultList.Count > 9)
-                {
-                    regularCameraPositionResultList.RemoveAt(0);
-                }
-
-                cameraPositionResultTemp.id = currentId;
-                regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTemp);
-
-                break;
-            case RequestCause.USERINITIATED:
-
-                if (initiatedCameraPositionResultList.Count > 9)
-                {
-                    initiatedCameraPositionResultList.RemoveAt(0);
-                }
-                cameraPositionResultTemp.id = currentId;
-                initiatedCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTemp);
-
-
-                break;
-        }
-
+        cameraPositionResultTmp = new CameraPositionResult();
+        cameraPositionResultTmp.cameraToWorldMatrix = cameraToWorldMatrixTmp;
+        cameraPositionResultTmp.projectionMatrix = projectionMatrixTmp;
 
         //start analyzing image
-        switch (currentRequestCause)
+        analysingScreenshot = true;
+
+#if (!UNITY_EDITOR)
+        if (screenshotsTakeable)
         {
-            case RequestCause.REGULAR:
-                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(e.ScreenshotAsTexture));
-                break;
-            case RequestCause.USERINITIATED:
-                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(e.ScreenshotAsTexture));
-                break;
+            //id
+            switch (currentRequestCause)
+            {
+                case RequestCause.REGULAR:
+
+                    if (regularCameraPositionResultList.Count > 9)
+                    {
+                        regularCameraPositionResultList.RemoveAt(0);
+                    }
+
+                    cameraPositionResultTmp.id = currentId;
+                    regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTmp);
+                    Debug.Log("!!!!!RegularLIST Count" + regularCameraPositionResultList.Count);
+                    apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
+                    break;
+                case RequestCause.USERINITIATED:
+
+                    screenshotsTakeable = false;
+                    this.screenshotManager._screenshotsTakeable = false;
+
+                    if (initiatedCameraPositionResultList.Count > 9)
+                    {
+                        initiatedCameraPositionResultList.RemoveAt(0);
+                    }
+                    cameraPositionResultTmp.id = currentId;
+                    initiatedCameraPositionResultList.Insert(initiatedCameraPositionResultList.Count, cameraPositionResultTmp);
+                    Debug.Log("!!!!!InitiatedLIST Count" + initiatedCameraPositionResultList.Count);
+                    apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
+                    break;
+            }
+            
         }
+#endif
+
+    }
+
+    private void onDoubleTapped(object sender, DoubleTapEventArgs e)
+    {
+        if (screenshotsTakeable)
+        {
+            this.currentRequestCause= e.RequestCause;
+        }
+    }
+
+    private void onTapped(object sender, TapEventArgs e)
+    {
+        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
+#if (!UNITY_EDITOR)
+        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
 #endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
+        if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED && e.Result.OcrService == OcrService.MICROSOFTMEDIAOCR)
+        {
+            //regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
+            return;
+        }
+        else
+        {
+            if (e.Result.OcrService == OcrService.MICROSOFTAZUREOCR)
+            {
+                Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + e.Result.OcrService + ": " + e.Result.Text + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            else
+            {
+                Debug.LogError(e.Result.OcrService + ": " + e.Result.Text);
+            }
+        }
+
+
         if (e.Result == null || e.Result.Text == "")
         {
-            if (currentRequestCause == RequestCause.USERINITIATED)
+            switch (currentRequestCause)
             {
-                System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+                case RequestCause.USERINITIATED:
+                    Debug.LogError("No text was found, please reposition yourself and try again");
 
-                initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+                    analysingScreenshot = false;
 
-            } else
-            {
-                regularCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+                    initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count-1);
+                    break;
+
+                case RequestCause.REGULAR:
+                    regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
+                    break;
             }
         }
         else
@@ -182,36 +226,20 @@ public class Controller : Singleton<Controller>
                     }                 
                     break;    
             }
-
-            //currentId++;
-            
-            displayText();
         }
 
-        //processingScreenshot = false;
-        //currentRequestCause = nextRequestCause;
+
+        if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED)
+        {
+            screenshotsTakeable = true;
+            this.currentRequestCause = RequestCause.REGULAR;
+            // this.nextRequestCause = RequestCause.REGULAR;
+            this.screenshotManager._screenshotsTakeable = true;
+            return;
+        }
+
+        
     }
-
-
-#if (!UNITY_EDITOR)
-
-    public void TakeScreenshot(RequestCause requestCause)
-    {
-        //processingScreenshot = true;
-        this.currentRequestCause = requestCause;
-        screenshotManager.TakeScreenshot();
-    }
-
-
-    public void RequestImageProcessing(RequestCause requestCause)
-    {
-        //nextRequestCause = requestCause;
-
-        TakeScreenshot(requestCause);
-    }
-
-
-#endif
 
     public void displayText()
     {
@@ -229,4 +257,5 @@ public enum RequestCause
     REGULAR,
     USERINITIATED,
 }
+
 

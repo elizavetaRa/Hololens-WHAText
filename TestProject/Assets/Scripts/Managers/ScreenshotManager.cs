@@ -3,187 +3,162 @@ using HoloToolkit.Unity;
 using System;
 using System.Linq;
 using UnityEngine.VR.WSA.WebCam;
-#if (!UNITY_EDITOR)
-using System.Threading.Tasks;
-#endif
 
 ///https://docs.unity3d.com/2017.1/Documentation/ScriptReference/VR.WSA.WebCam.PhotoCapture.html
 
 ///Demonstrates how to take a photo using the PhotoCapture functionality and display it on a Unity GameObject.
 /// <summary> Class responsible for taking screenshots </summary>
-public class ScreenshotManager: Singleton<ScreenshotManager> {
-	
-	 /// <summary> object that performs the photo capture </summary>
-	PhotoCapture photoCaptureObject = null;
+public class ScreenshotManager : Singleton<ScreenshotManager>
+{
+    /// <summary> object that performs the photo capture </summary>
+    PhotoCapture _photoCaptureObject;
 
-    Resolution cameraResolution;
-	
-	Texture2D targetTexture = null;
-    Renderer quadRenderer = null;
+    Resolution _cameraResolution;
+    CameraParameters _cameraParameters;
 
-    /// <summary> handles the event when a photograph was taken </summary>
-    public event EventHandler<QueryPhotoEventArgs> ScreenshotTaken;
+    // temporarily saving data of the latest frame captured
+    Matrix4x4 _cameraToWorldMatrixTmp, _projectionMatrixTmp;
+    Texture2D _imageAsTextureTmp;
 
+    public bool _screenshotsTakeable;
 
+    // needed for measuring captured frames per second
+    float _lastTime;
+    int _photoCount;
+
+    public event EventHandler ScreenshotTaken;
+    public event EventHandler ScreenshotsTakeable;
 
     // Use this for initialization
     void Start()
     {
-        //First: Last: worst resolution?
-        cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
-        //System.Diagnostics.Debug.WriteLine("Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+        // Use worst screenshot resolution to reduce CPU time
+        _cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
 
-        targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height);
+        _screenshotsTakeable = false;
+        _lastTime = 0.0f;
+        _photoCount = 0;
+
+        PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
     }
 
-    internal void TakeScreenshot()
+    void Update()
     {
-        
+        if (!_screenshotsTakeable) return;
 
-        // Create a PhotoCapture object
-        //Params: Show Holograms=false, onCreatedCallback, wenn PhotoCapture Instance created and ready to be used
-        PhotoCapture.CreateAsync(false, delegate (PhotoCapture captureObject)
-        {
-            photoCaptureObject = null;
-           photoCaptureObject = captureObject;
-
-            //needed for Calling PhotoCapture.StartPhotoModeAsync
-            CameraParameters cameraParameters = new CameraParameters();
-            cameraParameters.hologramOpacity = 0.0f;
-            cameraParameters.cameraResolutionWidth = cameraResolution.width;
-            cameraParameters.cameraResolutionHeight = cameraResolution.height;
-            cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
-
-            // Activate the web camera
-            photoCaptureObject.StartPhotoModeAsync(cameraParameters, delegate (PhotoCapture.PhotoCaptureResult result)
-            {
-                // Take a screenshot
-                photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-            });
-        });
-
+        _screenshotsTakeable = false;
+        _photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
     }
 
-	//wenn screenshot is captured to memory
+    void Stop()
+    {
+        _photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+    }
+
+    private void OnPhotoCaptureCreated(PhotoCapture photoCaptureObject)
+    {
+        if (photoCaptureObject == null)
+        {
+            Debug.LogError("Photo Capture could not be created");
+        }
+
+        Debug.LogError("Photo Capture created");
+        _photoCaptureObject = photoCaptureObject;
+
+        var supportedResolutions = (Resolution[])PhotoCapture.SupportedResolutions;
+
+        // emulator cannot take photos
+        if (supportedResolutions.Length == 0)
+        {
+            Debug.LogError("Photo mode could not be started. Are you using an emulator?");
+            _photoCaptureObject.Dispose();
+            _photoCaptureObject = null;
+            return;
+        }
+
+        // needed for starting photo mode
+        _cameraParameters = new CameraParameters();
+        _cameraParameters.hologramOpacity = 0.0f;
+        _cameraParameters.cameraResolutionWidth = _cameraResolution.width;
+        _cameraParameters.cameraResolutionHeight = _cameraResolution.height;
+        _cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+
+        // Activate the web camera
+        _photoCaptureObject.StartPhotoModeAsync(_cameraParameters, OnPhotoModeStarted);
+    }
+
+    private void OnPhotoModeStarted(PhotoCapture.PhotoCaptureResult result)
+    {
+        if (result.success)
+        {
+            Debug.LogError("Photo Mode started");
+            _screenshotsTakeable = true;
+
+            // send event if there are subscribers
+            var handler = ScreenshotsTakeable;
+            if (handler != null) handler.Invoke(this, new EventArgs());
+        }
+        else
+        {
+            Debug.LogError("Photo Mode couldn't be started");
+        }
+    }
+
+    // When screenshot is captured to memory
     void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
     {
-        
-		if (result.success)
+        if (result.success)
         {
             // play photo capture sound
             //Camera.main.GetComponent<AudioSource>().Play();
 
-            // save photograph to texture
-            Texture2D screenshot = new Texture2D(cameraResolution.width, cameraResolution.height);
-            photoCaptureFrame.UploadImageDataToTexture(screenshot);
-            //System.Diagnostics.Debug.WriteLine(" on captured: Height: " + cameraResolution.height + "\nWidth: " + cameraResolution.width);
+            // freeing up memory
+            Texture.Destroy(_imageAsTextureTmp);
 
+            // save photograph to texture
+            _imageAsTextureTmp = new Texture2D(_cameraResolution.width, _cameraResolution.height);
+            photoCaptureFrame.UploadImageDataToTexture(_imageAsTextureTmp);
 
             // position of camera/user at time of capturing screenshot
-            var cameraToWorldMatrix = new Matrix4x4();
-            var projectionMatrix = new Matrix4x4();
+            photoCaptureFrame.TryGetCameraToWorldMatrix(out _cameraToWorldMatrixTmp);
+            photoCaptureFrame.TryGetProjectionMatrix(out _projectionMatrixTmp);
 
-            photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix);
-            photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
-            
-            //System.Diagnostics.Debug.WriteLine(" camera to World in screenshot: " + cameraToWorldMatrix);
+            // measuring captured frames per second
+            if (_lastTime == 0)
+            {
+                _lastTime = Time.time;
+            }
+            if (Time.time - _lastTime < 1.0f)
+            {
+                _photoCount++;
+            }
+            else
+            {
+                // Debug.LogError("Photos per s: " + _photoCount);
+                _lastTime = Time.time;
+                _photoCount = 0;
+            }
 
-            /*List<byte> imageBufferList = new List<byte>();
-
-            // Convert to Byte List
-            photoCaptureFrame.CopyRawImageDataIntoBuffer(imageBufferList);*/
-
-            // send event with Bytelist of the captured screenshot
-            OnScreenshotTaken(new QueryPhotoEventArgs(screenshot, cameraToWorldMatrix, projectionMatrix));
-            
+            // send event if there are subscribers
+            var handler = ScreenshotTaken;
+            if (handler != null) handler.Invoke(this, new EventArgs());
         }
 
-        // Deactivate web camera
-        photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+        this._screenshotsTakeable = true;
     }
 
-	
-	
-	
-	/// called when photo mode is stopped
+    public void GetLatestPicture(out Texture2D picture, out Matrix4x4 cameraToWorldMatrix, out Matrix4x4 projectionMatrix)
+    {
+        picture = _imageAsTextureTmp;
+        cameraToWorldMatrix = _cameraToWorldMatrixTmp;
+        projectionMatrix = _projectionMatrixTmp;
+    }
+
+    // called when photo mode is stopped
     void OnStoppedPhotoMode(PhotoCapture.PhotoCaptureResult result)
     {
-        // Shutdown our photo capture resource
-        photoCaptureObject.Dispose();
-        photoCaptureObject = null;
-    }
-
-
-    /// <summary>
-    /// called whenever a screenshot has been taken
-    /// </summary>
-    /// <param name="e"></param>
-    protected virtual void OnScreenshotTaken(QueryPhotoEventArgs e)
-    {
-        // send event if there are subscribers
-        EventHandler<QueryPhotoEventArgs> handler = ScreenshotTaken;
-        if (handler != null) handler(this, e);
-    }
-
-
-}
-
-
-public class QueryPhotoEventArgs : EventArgs
-{
-    /// <summary>
-    /// constructor for the photo capture event parameters
-    /// </summary>
-    /// <param name="l"> Byte List of the captured screenshot </param>
-    public QueryPhotoEventArgs(Texture2D texture, Matrix4x4 cameraToWorldMatrix, Matrix4x4 projectionMatrix)
-    {
-        ScreenshotAsTexture = texture;
-        CameraToWorldMatrix = cameraToWorldMatrix;
-        ProjectionMatrix = projectionMatrix;
-       
-    }
-
-    
-    /// <summary>
-    /// Bytelist of the captured screenshot
-    /// </summary>
-    private Texture2D screenshot;
-
-
-    /// <summary>
-    /// Bytelist of the captured screenshot
-    /// </summary>
-    public Texture2D ScreenshotAsTexture
-    {
-        get; private set;
-    }
-
-
-    /// <summary>
-    /// cameraToWorld matrix
-    /// </summary>
-    private Matrix4x4 cameraToWorldMatrix;
-
-
-    /// <summary>
-    /// cameraToWorld matrix
-    /// </summary>
-    public Matrix4x4 CameraToWorldMatrix
-    {
-        get; private set;
-    }
-
-    /// <summary>
-    /// projection matrix
-    /// </summary>
-    private Matrix4x4 projectionMatrix;
-
-
-    /// <summary>
-    /// cameraToWorld matrix
-    /// </summary>
-    public Matrix4x4 ProjectionMatrix
-    {
-        get; private set;
+        // Shutdown photo capture resource
+        _photoCaptureObject.Dispose();
+        _photoCaptureObject = null;
     }
 }

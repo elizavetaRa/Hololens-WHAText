@@ -1,0 +1,25 @@
+Hung:
+
+- Texterkennung visualisieren (nach Geste des Nutzers)
+- POI Symbolobjekt anpassen, wesentlich verkleinern
+- nach bestimmten Zeit wird Bounding Box leicht hervorgehoben
+- Gesamter Text wird anklickbar
+
+
+Lisa:
+
+- Überarbeitung der Datenstruktur für die letzten gesp. Objekte
+ -> zwei getrennte: für lokale und remote OCR
+ -> Hologram Referenz mit speichern für späteres Löschen
+- Anfrageformulierungsfeld mit Button
+- Screenshot auslösen durch Doppelklick-Geste, alles andere mit einfacher
+
+
+Max:
+
+- Optimierung der Kameranutzung
+- Trennung zwischen Screenshot machen und Screenshot Verarbeitung
+- Für einheitliche Event-Propagierung: GestureManager mit EventHandler versehen
+- Wahl der Analysemethode des Screenshots im Controller schreiben (Parallel machbar!)
+- Requestformulierung an Google oder so
+- State Chart überlegen
