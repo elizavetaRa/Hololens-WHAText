@@ -47,6 +47,9 @@ public class Controller : Singleton<Controller>
     private List<CameraPositionResult> regularCameraPositionResultList = new List<CameraPositionResult>();
     private List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
 
+    // list with selected words to build request
+    private List<String> selectedWordsList = new List<String>();
+
 
     /// <summary>
     /// called when the application is started
@@ -63,6 +66,7 @@ public class Controller : Singleton<Controller>
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
         gesturesManager.Tapped += onTapped;
+        gesturesManager.DoubleTapped += onDoubleTapped;
 
         analysingScreenshot = false;
         timeCounter = 0;
@@ -115,6 +119,7 @@ public class Controller : Singleton<Controller>
 
                     cameraPositionResultTmp.id = currentId;
                     regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTmp);
+                    Debug.Log("!!!!!RegularLIST Count" + regularCameraPositionResultList.Count);
                     apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
                     break;
                 case RequestCause.USERINITIATED:
@@ -128,16 +133,18 @@ public class Controller : Singleton<Controller>
                     }
                     cameraPositionResultTmp.id = currentId;
                     initiatedCameraPositionResultList.Insert(initiatedCameraPositionResultList.Count, cameraPositionResultTmp);
+                    Debug.Log("!!!!!InitiatedLIST Count" + initiatedCameraPositionResultList.Count);
                     apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
                     break;
             }
+            
         }
        
 #endif
 
     }
 
-    private void onTapped(object sender, TapEventArgs e)
+    private void onDoubleTapped(object sender, DoubleTapEventArgs e)
     {
         if (screenshotsTakeable)
         {
@@ -145,10 +152,18 @@ public class Controller : Singleton<Controller>
         }
     }
 
+    private void onTapped(object sender, TapEventArgs e)
+    {
+        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
+
+
+    }
+
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
         if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED && e.Result.OcrService == OcrService.MICROSOFTMEDIAOCR)
         {
+            //regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
             return;
         }
         else
@@ -173,11 +188,11 @@ public class Controller : Singleton<Controller>
 
                     analysingScreenshot = false;
 
-                    initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+                    initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count-1);
                     break;
 
                 case RequestCause.REGULAR:
-                    regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count);
+                    regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
                     break;
             }
         }
@@ -243,4 +258,5 @@ public enum RequestCause
     REGULAR,
     USERINITIATED,
 }
+
 

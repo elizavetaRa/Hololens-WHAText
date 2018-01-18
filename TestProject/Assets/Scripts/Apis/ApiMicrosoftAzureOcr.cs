@@ -134,7 +134,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 
                 catch (HttpRequestException httpException)
                 {
-                    // Debug.LogError("<AzureOCR> Network Error.");
+                    Debug.LogError(httpException);
                     throw new HttpRequestException("HTTP Request Error");
                 }
 

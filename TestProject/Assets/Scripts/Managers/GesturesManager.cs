@@ -17,6 +17,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     /// </summary>
     private GestureRecognizer gestureRecognizer;
     public event EventHandler<TapEventArgs> Tapped;
+    public event EventHandler<DoubleTapEventArgs> DoubleTapped;
     const float DELAY = .5f;
 
     // Use this for initialization
@@ -59,6 +60,13 @@ public class GesturesManager: Singleton<GesturesManager> {
     {
         Debug.LogError("SingleTap was recognized.");
         // select words
+#if (!UNITY_EDITOR)
+        // send event to Controller
+        TapEventArgs args = new TapEventArgs();
+        args.Word = "Abstract Fuit";
+        var handler = Tapped;
+        if (handler != null) handler.Invoke(this, args);
+#endif
     }
 
     void DoubleTap()
@@ -66,9 +74,9 @@ public class GesturesManager: Singleton<GesturesManager> {
         Debug.LogError("DoubleTap was recognized.");
 #if (!UNITY_EDITOR)
         // send event to Controller
-        TapEventArgs args = new TapEventArgs();
+        DoubleTapEventArgs args = new DoubleTapEventArgs();
         args.RequestCause = RequestCause.USERINITIATED;
-        var handler = Tapped;
+        var handler = DoubleTapped;
         if (handler != null) handler.Invoke(this, args);
 #endif
     }
@@ -76,6 +84,11 @@ public class GesturesManager: Singleton<GesturesManager> {
 }
 
 public class TapEventArgs : EventArgs
+{
+    public String Word { get; set; }
+}
+
+public class DoubleTapEventArgs : EventArgs
 {
     public RequestCause RequestCause { get; set; }
 }
