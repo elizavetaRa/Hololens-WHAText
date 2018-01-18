@@ -17,6 +17,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     /// </summary>
     private GestureRecognizer gestureRecognizer;
     public event EventHandler<TapEventArgs> Tapped;
+    const float DELAY = .5f;
 
     // Use this for initialization
     void Start()
@@ -26,7 +27,7 @@ public class GesturesManager: Singleton<GesturesManager> {
 
         // create an new gesture recognizer to detect when user taps to shoot a screenshot
         gestureRecognizer = new GestureRecognizer();
-        gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap);
+        gestureRecognizer.SetRecognizableGestures(GestureSettings.Tap | GestureSettings.DoubleTap);
         gestureRecognizer.TappedEvent += OnTap;
         gestureRecognizer.StartCapturingGestures();
 
@@ -43,17 +44,33 @@ public class GesturesManager: Singleton<GesturesManager> {
     private void OnTap(InteractionSourceKind source, int tapCount, Ray headRay)
     {
 
-        // send log message and set waiting mode
-        System.Diagnostics.Debug.WriteLine("Tap was recognized.");
+        if (tapCount == 1)
+            Invoke("SingleTap", DELAY);
+        else if (tapCount == 2)
+        {
+            CancelInvoke("SingleTap");
+            DoubleTap();
+        }
 
-        // send event to Controller
+        
+    }
+
+    void SingleTap()
+    {
+        Debug.LogError("SingleTap was recognized.");
+        // select words
+    }
+
+    void DoubleTap()
+    {
+        Debug.LogError("DoubleTap was recognized.");
 #if (!UNITY_EDITOR)
+        // send event to Controller
         TapEventArgs args = new TapEventArgs();
         args.RequestCause = RequestCause.USERINITIATED;
         var handler = Tapped;
         if (handler != null) handler.Invoke(this, args);
 #endif
-
     }
 
 }

@@ -159,8 +159,8 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
         if (responseTemp.Text == "" || responseTemp.Text == null)
         {
-            Debug.LogError("<MediaOCR> " + "No Text recognized");
-            this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
+            // Debug.LogError("<MediaOCR> " + "No Text recognized");
+            this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0), OcrService.MICROSOFTMEDIAOCR);
         }
         else
         {
@@ -196,8 +196,8 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
                 }
             }
 
-            this.OcrResult = new OcrResult(responseTemp.Text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
-            Debug.LogError("<MediaOCR> " + this.OcrResult.Text);
+            this.OcrResult = new OcrResult(responseTemp.Text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)), OcrService.MICROSOFTMEDIAOCR);
+            // Debug.LogError("<MediaOCR> " + this.OcrResult.Text);
         }
 #endif
     }
@@ -221,7 +221,7 @@ public class ApiMicrosoftMediaOcr : IServiceAdaptor
 
     private async Task LoadSampleImageFromFile()
     {
-        Debug.LogError(Windows.ApplicationModel.Package.Current.InstalledLocation);
+        // Debug.LogError(Windows.ApplicationModel.Package.Current.InstalledLocation);
         var file = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync("Assets\\Schriftarten.PNG");
         await LoadImageFromFile(file);
     }

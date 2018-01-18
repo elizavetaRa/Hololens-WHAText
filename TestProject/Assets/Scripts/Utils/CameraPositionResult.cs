@@ -4,18 +4,15 @@ using System.Collections;
 /// <summary>
 /// Storage for camera position, result and text object of last 10 screenshots
 /// </summary>
-public struct CameraPositionResult
+public class CameraPositionResult
 {
-    // Matrix that transforms from camera space to world space.
-    //Use this to calculate where in the world a specific camera space point is
-    //public Vector3 cameraPosition;
-    //public Quaternion cameraRotation;
+    public int id { get; set; }
 
-    public Matrix4x4 projectionMatrix;
-    public Matrix4x4 cameraToWorldMatrix;
+    public Matrix4x4 projectionMatrix { get; set; }
+    public Matrix4x4 cameraToWorldMatrix { get; set; }
 
     //result of recognition with screenshot
-    public OcrResult ocrResult;
+    public OcrResult ocrResult { get; set; }
 
     // appropriate text object
 

@@ -28,24 +28,24 @@ public class Controller : Singleton<Controller>
     private const float shortTime = .1F;
 
     private RequestCause currentRequestCause, nextRequestCause;
-    IntPtr imagePointer;
-    byte[] imageData;
-    int imageWidth, imageHeight;
 
     private bool analysingScreenshot;
-    CameraPositionResult cameraPositionResultTemp;
+    private CameraPositionResult cameraPositionResultTmp;
+    private bool screenshotsTakeable;
 
     //private Picture screenshot;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
 
     // temporarily saving data from the latest frame captured
-    Matrix4x4 cameraToWorldMatrixTmp, projectionMatrixTmp;
-    Texture2D imageAsTextureTmp;
+    private Matrix4x4 cameraToWorldMatrixTmp, projectionMatrixTmp;
+    private Texture2D imageAsTextureTmp;
+
+    private int currentId;
 
     // stack of 10 latest camera positions, ocrResults
-    Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
-
+    private List<CameraPositionResult> regularCameraPositionResultList = new List<CameraPositionResult>();
+    private List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
 
 
     /// <summary>
@@ -71,8 +71,12 @@ public class Controller : Singleton<Controller>
         currentRequestCause = RequestCause.REGULAR;
         nextRequestCause = RequestCause.REGULAR;
 
-        //repeating capturing screenshots function starts in 1s every 0.5s
-        //timer = new System.Threading.Timer(IsImageProcessed, "Timer", TimeSpan.FromSeconds(5.0), TimeSpan.FromSeconds(5.0));
+        screenshotsTakeable = true;
+
+
+        cameraPositionResultTmp = new CameraPositionResult();
+
+        currentId = 0;
     }
 
     void Update()
@@ -86,87 +90,148 @@ public class Controller : Singleton<Controller>
     /// <param name="e"> the photograph event parameters </param>
     private void OnScreenshotTaken(object sender, EventArgs e)
     {
-#if (!UNITY_EDITOR)
         // Save ref for latest picture taken
         screenshotManager.GetLatestPicture(out imageAsTextureTmp, out cameraToWorldMatrixTmp, out projectionMatrixTmp);
 
-        //// recalculate Camera to World Matrix to position and rotation
-        //cameraPosition = e.CameraToWorldMatrix.MultiplyPoint3x4(new Vector3(0, 0, -1));
-        //cameraRotation = Quaternion.LookRotation(-e.CameraToWorldMatrix.GetColumn(2), e.CameraToWorldMatrix.GetColumn(1));
-
-        //// store last 10 camera positions to queue of cemera position results
-        //cameraPositionResultTemp = new CameraPositionResult();
-
-        ////cameraPositionResult.cameraPosition = cameraPosition;
-        ////cameraPositionResult.cameraRotation = cameraRotation;
-        //cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        //cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
-
-        ////cameraPositionResult.cameraPosition = cameraPosition;
-        ////cameraPositionResult.cameraRotation = cameraRotation;
-        //cameraPositionResultTemp.cameraToWorldMatrix = e.CameraToWorldMatrix;
-        //cameraPositionResultTemp.projectionMatrix = e.ProjectionMatrix;
-
-        //if (cameraPositionResultQueue.Count > 9)
-        //{
-        //    cameraPositionResultQueue.Dequeue();
-        //}
-
-        ////cameraPositionResultQueue.Enqueue(cameraPositionResult);
-
-
-        ////this.displayText();
-
+        cameraPositionResultTmp = new CameraPositionResult();
+        cameraPositionResultTmp.cameraToWorldMatrix = cameraToWorldMatrixTmp;
+        cameraPositionResultTmp.projectionMatrix = projectionMatrixTmp;
 
         //start analyzing image
         analysingScreenshot = true;
 
-        switch (currentRequestCause)
+#if (!UNITY_EDITOR)
+        if (screenshotsTakeable)
         {
-            case RequestCause.REGULAR:
-                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
-                break;
-            case RequestCause.USERINITIATED:
-                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
-                break;
-        }
+            //id
+            switch (currentRequestCause)
+            {
+                case RequestCause.REGULAR:
 
-        currentRequestCause = this.nextRequestCause;
-        this.nextRequestCause = RequestCause.REGULAR;
+                    if (regularCameraPositionResultList.Count > 9)
+                    {
+                        regularCameraPositionResultList.RemoveAt(0);
+                    }
+
+                    cameraPositionResultTmp.id = currentId;
+                    regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTmp);
+                    apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
+                    break;
+                case RequestCause.USERINITIATED:
+
+                    screenshotsTakeable = false;
+                    this.screenshotManager._screenshotsTakeable = false;
+
+                    if (initiatedCameraPositionResultList.Count > 9)
+                    {
+                        initiatedCameraPositionResultList.RemoveAt(0);
+                    }
+                    cameraPositionResultTmp.id = currentId;
+                    initiatedCameraPositionResultList.Insert(initiatedCameraPositionResultList.Count, cameraPositionResultTmp);
+                    apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
+                    break;
+            }
+        }
+       
 #endif
+
     }
 
     private void onTapped(object sender, TapEventArgs e)
     {
-        this.nextRequestCause = e.RequestCause;
+        if (screenshotsTakeable)
+        {
+            this.currentRequestCause= e.RequestCause;
+        }
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
     {
-        if ((e.Result == null || e.Result.Text == "") && currentRequestCause == RequestCause.USERINITIATED)
-            System.Diagnostics.Debug.WriteLine("No text was found, please reposition yourself and try again");
+        if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED && e.Result.OcrService == OcrService.MICROSOFTMEDIAOCR)
+        {
+            return;
+        }
+        else
+        {
+            if (e.Result.OcrService == OcrService.MICROSOFTAZUREOCR)
+            {
+                Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + e.Result.OcrService + ": " + e.Result.Text + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            }
+            else
+            {
+                Debug.LogError(e.Result.OcrService + ": " + e.Result.Text);
+            }
+        }
 
-        analysingScreenshot = false;
+
+        if (e.Result == null || e.Result.Text == "")
+        {
+            switch (currentRequestCause)
+            {
+                case RequestCause.USERINITIATED:
+                    Debug.LogError("No text was found, please reposition yourself and try again");
+
+                    analysingScreenshot = false;
+
+                    initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count);
+                    break;
+
+                case RequestCause.REGULAR:
+                    regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count);
+                    break;
+            }
+        }
+        else
+        {
+            // check for capacity of result list
+
+            switch (currentRequestCause)
+            {
+                case RequestCause.REGULAR:
+
+                    for (int i = 0; i < regularCameraPositionResultList.Count; i++)
+                    {
+                        if (regularCameraPositionResultList[i].id == currentId)
+                        {
+                            regularCameraPositionResultList[i].ocrResult = e.Result;
+                            currentId++;
+                            break;
+                        }
+                    }
+
+                    break;
+                case RequestCause.USERINITIATED:
+                    for (int i = 0; i < initiatedCameraPositionResultList.Count; i++)
+                    {
+                        if (initiatedCameraPositionResultList[i].id == currentId)
+                        {
+                            initiatedCameraPositionResultList[i].ocrResult = e.Result;
+                             currentId++;
+                            break;
+                        }                                             
+                    }                 
+                    break;    
+            }
+        }
+
+
+        if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED)
+        {
+            screenshotsTakeable = true;
+            this.currentRequestCause = RequestCause.REGULAR;
+            // this.nextRequestCause = RequestCause.REGULAR;
+            this.screenshotManager._screenshotsTakeable = true;
+            return;
+        }
+
+        
     }
-
-
-#if (!UNITY_EDITOR)
-
-    //public async Task TakeScreenshot(RequestCause requestCause)
-    //{
-    //    //processingScreenshot = true;
-    //    //this.currentRequestCause = requestCause;
-    //    screenshotManager.TakeScreenshot();
-    //}
-
-  
-#endif
 
     public void displayText()
     {
-        var size = cameraPositionResultQueue.Count;
+        var size = regularCameraPositionResultList.Count;
 
-        visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size - 1));
+        visualTextManager.visualizeText(regularCameraPositionResultList.ElementAt(size - 1));
 
     }
 
@@ -178,3 +243,4 @@ public enum RequestCause
     REGULAR,
     USERINITIATED,
 }
+

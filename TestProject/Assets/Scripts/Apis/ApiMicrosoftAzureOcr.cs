@@ -30,7 +30,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
         if (ApiKey != "" && ApiKey != null)
             this.ApiKey = ApiKey;
 
-        this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0));
+        this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0), OcrService.MICROSOFTAZUREOCR);
     }
 
     public static ApiMicrosoftAzureOcr Instance
@@ -115,7 +115,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
             {
                 try
                 {
-                    Debug.LogError("<AzureOCR> Try Nr " + count);
+                    // Debug.LogError("<AzureOCR> Try Nr " + count);
 
                     // Execute the REST API call.
                     response = await client.PostAsync(uri, content);
@@ -128,19 +128,19 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                     //System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
 
                     ParseResponseData(contentString);
-                    Debug.LogError("<AzureOCR> " + OcrResult.Text);
+                    // Debug.LogError("<AzureOCR> " + OcrResult.Text);
                     break;
                 }
 
                 catch (HttpRequestException httpException)
                 {
-                    Debug.LogError("<AzureOCR> Network Error.");
+                    // Debug.LogError("<AzureOCR> Network Error.");
                     throw new HttpRequestException("HTTP Request Error");
                 }
 
                 catch (Exception e)
                 {
-                    Debug.LogError("<AzureOCR> Api Request Error: " + e);
+                    // Debug.LogError("<AzureOCR> Api Request Error: " + e);
                     await Task.Delay(delay);
                     count++;
                 }
@@ -240,7 +240,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
 #if (!UNITY_EDITOR)
         if ((string)response == "" || response == null)
         {
-            Debug.LogError("<AzureOCR> No Text recognized");
+            // Debug.LogError("<AzureOCR> No Text recognized");
         }
         else
         {
@@ -289,7 +289,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                 }
             }
 
-            this.OcrResult = new OcrResult(text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)));
+            this.OcrResult = new OcrResult(text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)), OcrService.MICROSOFTAZUREOCR);
         }
            
 

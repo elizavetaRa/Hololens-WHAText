@@ -20,7 +20,7 @@ public class ScreenshotManager : Singleton<ScreenshotManager>
     Matrix4x4 _cameraToWorldMatrixTmp, _projectionMatrixTmp;
     Texture2D _imageAsTextureTmp;
 
-    bool _screenshotsTakeable;
+    public bool _screenshotsTakeable;
 
     // needed for measuring captured frames per second
     float _lastTime;
