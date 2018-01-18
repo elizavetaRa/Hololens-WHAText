@@ -50,7 +50,6 @@ public class Controller : Singleton<Controller>
     // list with selected words to build request
     private List<String> selectedWordsList = new List<String>();
 
-
     /// <summary>
     /// called when the application is started
     /// </summary>
@@ -139,7 +138,6 @@ public class Controller : Singleton<Controller>
             }
             
         }
-       
 #endif
 
     }
@@ -155,8 +153,9 @@ public class Controller : Singleton<Controller>
     private void onTapped(object sender, TapEventArgs e)
     {
         selectedWordsList.Insert(selectedWordsList.Count, e.Word);
-
-
+#if (!UNITY_EDITOR)
+        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
+#endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
