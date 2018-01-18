@@ -46,7 +46,7 @@ public class Controller : Singleton<Controller>
     // stack of 10 latest camera positions, ocrResults
     Queue<CameraPositionResult> cameraPositionResultQueue = new Queue<CameraPositionResult>();
 
-
+    private bool tryOutYummly = true; 
 
     /// <summary>
     /// called when the application is started
@@ -119,20 +119,20 @@ public class Controller : Singleton<Controller>
 
 
         //start analyzing image
-        analysingScreenshot = true;
+        //analysingScreenshot = true;
 
-        switch (currentRequestCause)
-        {
-            case RequestCause.REGULAR:
-                apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
-                break;
-            case RequestCause.USERINITIATED:
-                apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
-                break;
-        }
+        //switch (currentRequestCause)
+        //{
+        //    case RequestCause.REGULAR:
+        //        apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
+        //        break;
+        //    case RequestCause.USERINITIATED:
+        //        apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
+        //        break;
+        //}
 
-        currentRequestCause = this.nextRequestCause;
-        this.nextRequestCause = RequestCause.REGULAR;
+        //currentRequestCause = this.nextRequestCause;
+        //this.nextRequestCause = RequestCause.REGULAR;
 #endif
     }
 

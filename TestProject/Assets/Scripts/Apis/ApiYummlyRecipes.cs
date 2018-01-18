@@ -3,7 +3,10 @@ using System;
 using System.Threading.Tasks;
 using System.Net.Http;
 #endif
+using AssemblyCSharpWSA.Scripts.Utils;
 using UnityEngine;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 /// <summary>
 /// API Requests with Yummly Recipes API
@@ -14,7 +17,7 @@ public class ApiYummlyRecipes
     public delegate void OnGetDataCompleted(string id, string json);
     private static ApiYummlyRecipes instance = null;
     public string apiKey = "";
-    private string uri = "https://api.yummly.com/v1";
+    private string uri = "https://api.yummly.com/v1/api/recipes";
     // Number of Maximum Requests Until Error Message Gets Shown
     private int maxTries = 3;
     // Delay Time Between Request Sendings in ms
@@ -41,7 +44,7 @@ public class ApiYummlyRecipes
         }
     }
 
-    public RecipeResult RecipeResult
+    public RecipeResult.RootObject RecipeResult
     {
         get;
         private set;
@@ -51,7 +54,7 @@ public class ApiYummlyRecipes
     {
         get
         {
-            return null;
+            return apiKey;
         }
 
         set
@@ -64,7 +67,7 @@ public class ApiYummlyRecipes
     {
         get
         {
-            return null;
+            return uri;
         }
 
         set
@@ -74,77 +77,81 @@ public class ApiYummlyRecipes
     }
 
 #if (!UNITY_EDITOR)
-    public async Task<OcrResult> HttpPostImage(string[] ingredients)
+    public async Task<RecipeResult.RootObject> HttpGetRecipesByIngredients(string[] ingredients)
     {
         RecipeResult = null;
         HttpClient client = new HttpClient();
 
+        List<string> queryParameters = new List<string>();
+
         // Setting headers
-        client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip");
-        client.DefaultRequestHeaders.Add("X-Yummly-App-ID", "");
-        client.DefaultRequestHeaders.Add("X-Yummly-App-Key", "");
+        client.DefaultRequestHeaders.Add("X-Yummly-App-ID", "4ac0164f");
+        client.DefaultRequestHeaders.Add("X-Yummly-App-Key", "ced2ceb7ccf7410227ba6dcb72020c5e");
 
         // Set request URI
-        string allowedIngredientsParam = "?";
-        string requestUri = Uri + "?allowedIngredient[]=" + requestString;
-        HttpResponseMessage response;
+        string requirePicturesParam = "requirePictures=false"; 
+        string allowedIngredientsParamName = "allowedIngredient[]=";
 
-        // Request body.
-        byte[] byteData;
-        if (screenshot == null)
-            byteData = await GetImageAsByteArray("Assets\\Schriftarten.PNG");
-        else
-            byteData = screenshot.AsJPEG;
-
-        using (ByteArrayContent content = new ByteArrayContent(byteData))
+        for (int i = 0; i < ingredients.Length; i++)
         {
-            // Using octet-stream for local image location
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-
-            // execute request maxTries times until fallback to Media.OCR is used
-            int count = 0;
-
-            while (count < maxTries)
-            {
-                try
-                {
-                    Debug.LogError("<AzureOCR> Try Nr " + count);
-
-                    // Execute the REST API call.
-                    response = await client.PostAsync(uri, content);
-
-                    // Get the JSON response.
-                    string contentString = await response.Content.ReadAsStringAsync();
-
-                    // Display the JSON response.
-                    //System.Diagnostics.Debug.WriteLine("\nResponse:\n");
-                    //System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
-
-                    ParseResponseData(contentString);
-                    Debug.LogError("<AzureOCR> " + OcrResult.Text);
-                    break;
-                }
-
-                catch (HttpRequestException httpException)
-                {
-                    Debug.LogError("<AzureOCR> Network Error.");
-                    throw new HttpRequestException("HTTP Request Error");
-                }
-
-                catch (Exception e)
-                {
-                    Debug.LogError("<AzureOCR> Api Request Error: " + e);
-                    await Task.Delay(delay);
-                    count++;
-                }
-
-            }
+            queryParameters.Add(allowedIngredientsParamName + ingredients[i]);
         }
 
-        //System.Diagnostics.Debug.WriteLine("OCR finished");
-        return OcrResult;
+        queryParameters.Add(requirePicturesParam);
+
+        string requestUri = Uri + "?" + String.Join("&", queryParameters);
+        Debug.LogError(requestUri);
+        HttpResponseMessage response;
+
+        int count = 0;
+
+        while (count < maxTries)
+        {
+            try
+            {
+                Debug.LogError("<YummlyRecipe> Try Nr " + count);
+
+                // Execute the REST API call.
+                response = await client.GetAsync(requestUri);
+
+                Debug.LogError(response);
+
+                // Get response string
+                string contentString = await response.Content.ReadAsStringAsync();
+
+                if (contentString == "" || contentString == null)
+                {
+                    Debug.LogError("<YummlyRecipe> No text found");
+                }
+                else
+                {
+                    Debug.LogError(contentString);
+                    RecipeResult = JsonConvert.DeserializeObject<RecipeResult.RootObject>(contentString);
+                    Debug.LogError("<YummlyRecipe> " + RecipeResult.totalMatchCount + " Recipes found.");
+                }
+
+                break;
+            }
+
+            catch (HttpRequestException httpException)
+            {
+                Debug.LogError("<YummlyRecipe> Network Error.");
+                throw new HttpRequestException("HTTP Request Error");
+            }
+
+            catch (Exception e)
+            {
+                Debug.LogError("<YummlyRecipe> Api Request Error: " + e);
+                await Task.Delay(delay);
+                count++;
+            }
+
+            }
+
+            return RecipeResult;
     }
 #endif
+
 
 
 }

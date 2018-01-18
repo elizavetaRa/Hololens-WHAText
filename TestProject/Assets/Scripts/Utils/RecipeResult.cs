@@ -2,7 +2,7 @@
 
 namespace AssemblyCSharpWSA.Scripts.Utils
 {
-    class RecipeResult
+    public class RecipeResult
     {
         public class Attribution
         {
@@ -12,67 +12,85 @@ namespace AssemblyCSharpWSA.Scripts.Utils
             public string logo { get; set; }
         }
 
-        public class Flavors
+        public class FacetCounts
         {
-            public double Salty { get; set; }
-            public double Meaty { get; set; }
-            public int Piquant { get; set; }
-            public double Bitter { get; set; }
-            public double Sour { get; set; }
-            public double Sweet { get; set; }
-        }
-
-        public class Unit
-        {
-            public string name { get; set; }
-            public string abbreviation { get; set; }
-            public string plural { get; set; }
-            public string pluralAbbreviation { get; set; }
-        }
-
-        public class NutritionEstimate
-        {
-            public string attribute { get; set; }
-            public string description { get; set; }
-            public double value { get; set; }
-            public Unit unit { get; set; }
-        }
-
-        public class Image
-        {
-            public string hostedLargeUrl { get; set; }
-            public string hostedSmallUrl { get; set; }
         }
 
         public class Attributes
         {
-            public List<string> holiday { get; set; }
+            public List<string> course { get; set; }
             public List<string> cuisine { get; set; }
+            public List<string> holiday { get; set; }
         }
 
-        public class Source
+        public class Flavors
         {
-            public string sourceRecipeUrl { get; set; }
-            public string sourceSiteUrl { get; set; }
-            public string sourceDisplayName { get; set; }
+            public double salty { get; set; }
+            public double sour { get; set; }
+            public double sweet { get; set; }
+            public double bitter { get; set; }
+            public double meaty { get; set; }
+            public double piquant { get; set; }
         }
 
-        public class RootObject
+        public class Match
         {
-            public Attribution attribution { get; set; }
-            public List<string> ingredientLines { get; set; }
-            public Flavors flavors { get; set; }
-            public List<NutritionEstimate> nutritionEstimates { get; set; }
-            public List<Image> images { get; set; }
-            public string name { get; set; }
-            public string yield { get; set; }
-            public string totalTime { get; set; }
             public Attributes attributes { get; set; }
-            public int totalTimeInSeconds { get; set; }
+            public Flavors flavors { get; set; }
             public double rating { get; set; }
-            public int numberOfServings { get; set; }
-            public Source source { get; set; }
             public string id { get; set; }
+            public List<object> smallImageUrls { get; set; }
+            public string sourceDisplayName { get; set; }
+            public int totalTimeInSeconds { get; set; }
+            public List<string> ingredients { get; set; }
+            public string recipeName { get; set; }
         }
+
+        public class FlavorPiquant
+        {
+            public double min { get; set; }
+            public int max { get; set; }
+        }
+
+        public class AttributeRanges
+        {
+            public FlavorPiquant flavorPiquant { get; set; }
     }
+
+    public class FAT
+    {
+        public int min { get; set; }
+        public int max { get; set; }
+    }
+
+    public class NutritionRestrictions
+    {
+        public FAT FAT { get; set; }
+    }
+
+    public class Criteria
+    {
+        public int maxResults { get; set; }
+        public List<string> excludedIngredients { get; set; }
+        public List<object> excludedAttributes { get; set; }
+        public List<string> allowedIngredients { get; set; }
+        public AttributeRanges attributeRanges { get; set; }
+        public NutritionRestrictions nutritionRestrictions { get; set; }
+        public List<string> allowedDiets { get; set; }
+        public int resultsToSkip { get; set; }
+        public bool requirePictures { get; set; }
+        public List<object> facetFields { get; set; }
+        public List<string> terms { get; set; }
+        public List<string> allowedAttributes { get; set; }
+    }
+
+    public class RootObject
+    {
+        public Attribution attribution { get; set; }
+        public int totalMatchCount { get; set; }
+        public FacetCounts facetCounts { get; set; }
+        public List<Match> matches { get; set; }
+        public Criteria criteria { get; set; }
+    }
+}
 }
