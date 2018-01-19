@@ -35,6 +35,7 @@ public class textAreaScript : MonoBehaviour {
     void OnClick()
     {
         //textAreaBox.GetComponent<SpriteRenderer>().color = Color.green;
+        this.gameObject.SetActive(false);
         textPrefab.text = ("HI!");
         //Debug.Log(textPrefab.text);
     }
