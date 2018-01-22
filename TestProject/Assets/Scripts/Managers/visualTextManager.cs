@@ -26,6 +26,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         this.line3 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line4 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line5 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
+        line5.startColor = Color.red;
         line5.endColor = Color.red;
 
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
@@ -62,7 +63,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         if(oldObject != null)
         {
-
             oldObject.SendMessageUpwards("OnDefocus", SendMessageOptions.DontRequireReceiver);
         }
         if (newObject != null)
@@ -85,10 +85,10 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float textY = 0;//ocrResult.BoundingBox.y;
         float textWidth = ImageWidth;// ocrResult.BoundingBox.width;
         float textHeight = ImageHeight;// ocrResult.BoundingBox.height;
-        //var gazeDirection = Camera.main.transform.forward;
+        var gazeDirection = Camera.main.transform.forward;
         Debug.Log(ocrResult.BoundingBox);
         Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
-        Vector3[] WorldSpaceCenter = convert2DtoWorld(ocrResult.BoundingBox.x  , ocrResult.BoundingBox.y  , ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (ImageWidth/2), textY + (ImageHeight/2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX , textY , ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         Vector3[] WorldSpaceBotLeft = convert2DtoWorld(textX, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
@@ -108,8 +108,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
 
-        RaycastHit hitCenter, hitTopLeft, hitTopRight, hitBotLeft, hitBotRight;
-        if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight))
+        RaycastHit hitCenter, hitTopLeft, hitTopRight, hitBotLeft, hitBotRight, hitGaze;
+        if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
         {
             Debug.Log("Raycasts hit!");
 
@@ -121,6 +121,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
 
             //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
+            line4.SetPositions(new[] { headPosition, hitGaze.point });
             line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
             
 
