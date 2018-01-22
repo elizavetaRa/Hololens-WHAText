@@ -11,8 +11,6 @@ public class requestButtonScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Debug.Log("active");
-		
 	}
 
     void onFocus()

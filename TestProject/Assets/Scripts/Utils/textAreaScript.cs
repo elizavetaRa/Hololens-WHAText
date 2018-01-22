@@ -8,13 +8,12 @@ public class textAreaScript : MonoBehaviour {
     private TextMesh textPrefab;
     private GameObject textAreaBox;
     private Vector3 textAreaBoxSize;
-    private Color originalColor;
+
 	void Start () {
         textPrefab = this.gameObject.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
         textAreaBox = this.gameObject.transform.Find("textAreaBox").gameObject;
         textAreaBoxSize = textAreaBox.transform.localScale;
         //originalColor = textAreaBox.GetComponent<SpriteRenderer>().color;
-        // textAreaBox.transform.localScale = new Vector3(0, 0, 0);
         textAreaBox.transform.localScale = new Vector3(0, 0, 0);
 
     }
@@ -36,7 +35,7 @@ public class textAreaScript : MonoBehaviour {
     void OnClick()
     {
         //textAreaBox.GetComponent<SpriteRenderer>().color = Color.green;
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
         textPrefab.text = ("HI!");
         //Debug.Log(textPrefab.text);
     }

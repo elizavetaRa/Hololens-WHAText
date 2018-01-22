@@ -38,7 +38,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
 
         focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
-
+        
 
     }
 
@@ -115,29 +115,22 @@ public class VisualTextManager : Singleton<VisualTextManager>
         Debug.Log(ocrResult.BoundingBox);
         Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
         Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (ImageWidth / 2), textY + (ImageHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        Vector3[] WorldSpaceBotLeft = convert2DtoWorld(textX, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        Vector3[] WorldSpaceBotRight = convert2DtoWorld(textX + textWidth, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        //Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        //Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        //Vector3[] WorldSpaceBotLeft = convert2DtoWorld(textX, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        //Vector3[] WorldSpaceBotRight = convert2DtoWorld(textX + textWidth, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         var CameraToWorld = cameraPositionResult.cameraToWorldMatrix;
         var Projection = cameraPositionResult.projectionMatrix;
 
 
-        Vector2 ImagePosZeroToOne = new Vector2((ocrResult.BoundingBox.x + textWidth) / ImageWidth, 1.0f - ((ocrResult.BoundingBox.y + textHeight) / ImageHeight));
-        Vector2 ImagePosProjected = ((ImagePosZeroToOne * 2.0f) - new Vector2(1, 1)); // -1 to 1 space
 
-        Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
-
-        //Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyVector(new Vector4(0, 0, 0, 1)); // camera location in world space
-        Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyPoint3x4(new Vector3(0, 0, -1)); // camera location in world space
-        Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
 
 
 
         RaycastHit hitCenter, hitTopLeft, hitTopRight, hitBotLeft, hitBotRight, hitGaze;
-        //if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
-            if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
-            {
+       // if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
+            if (Physics.Raycast(headPosition, WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
+        {
             Debug.Log("Raycasts hit!");
 
             //line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
@@ -148,7 +141,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
 
             //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
-            //line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
+            line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
+            line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
 
 
 
@@ -289,7 +283,11 @@ public class VisualTextManager : Singleton<VisualTextManager>
         Vector3 CameraSpacePos = UnProjectVector(Projection, new Vector3(ImagePosProjected.x, ImagePosProjected.y, 1));
         Vector3 WorldSpaceRayPoint1 = CameraToWorld.MultiplyPoint3x4(new Vector4(0f, 0f, 0f, 1f)); // camera location in world space
         Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
-
+        var headPosition = Camera.main.transform.position;
+        var gazeDirection = Camera.main.transform.forward;
+        Debug.Log("Input x:" + x + " ;y: " + y + " ;head: " + headPosition + " ;gaze: " + gazeDirection*1000);
+        Debug.Log("ImagesPosZero: " + ImagePosZeroToOne + " ;ImagePosProjected" + ImagePosProjected + " ;CameraSpacePos " + CameraSpacePos + " ;Point1:" + WorldSpaceRayPoint1 + " ;Point2: " + WorldSpaceRayPoint2*1000);
+        Debug.Log("camera2world: " + CameraToWorld + " ; CameraSpacePos:" + CameraSpacePos * 100);
         result[0] = WorldSpaceRayPoint1;
         result[1] = WorldSpaceRayPoint2;
 
