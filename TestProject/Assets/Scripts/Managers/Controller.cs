@@ -182,7 +182,7 @@ public class Controller : Singleton<Controller>
     {
         var size = cameraPositionResultQueue.Count;
 
-        visualTextManager.visualizeText(cameraPositionResultQueue.ElementAt(size - 1));
+        visualTextManager.hightlightTextLocation(cameraPositionResultQueue.ElementAt(size - 1));
 
     }
 

@@ -8,7 +8,7 @@ using HoloToolkit.Unity.InputModule;
 
 public class VisualTextManager : Singleton<VisualTextManager>
 {
-
+    public GameObject textHighlight;
     public GameObject textArea;
     // public GameObject LineRenderer;
     private GazeManager gazeManager;
@@ -28,7 +28,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
         this.line5 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         line5.startColor = Color.red;
         line5.endColor = Color.red;
-
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
         focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
         //visualizeText(dummy);
@@ -121,30 +120,84 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
 
             //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
-            line4.SetPositions(new[] { headPosition, hitGaze.point });
-            line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
+            //line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
+
+
+
+
+            GameObject newArea = Instantiate(textArea);
+            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+           
+            //set Text
+            visualText.text = ocrResult.Text;
+
+            //set Position
+            newArea.transform.position = hitCenter.point;
+
+            //set Rotation
+            Quaternion toQuat = Camera.main.transform.localRotation;
+            toQuat.x = 0;
+            toQuat.z = 0;
+            newArea.transform.rotation = toQuat;
+
+            //set Size
+            Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
+            Vector3 currentSize = textAreaBox.size;
+
+
+            float distance = (hitCenter.point - headPosition).magnitude; ;
+            float targetWidth = (hitTopLeft.point - hitTopRight.point).magnitude / (distance );
+            float targetHeight = (hitTopLeft.point - hitBotLeft.point).magnitude / (distance );
+            float currentWidth = currentSize.x;
+            float currentHeight = currentSize.y;
+            float scaleWidth = targetWidth / currentWidth;
+            float scaleHeight = targetHeight / currentHeight;
+            Vector3 scale = newArea.transform.localScale;
+            scale.x = targetWidth * scale.x;
+            scale.y = targetHeight * scale.y;
+            //newArea.transform.localScale = scale;
+            
+        }
+    }
+
+    internal void hightlightTextLocation(CameraPositionResult cameraPositionResult)
+    {
+        float ImageWidth = Camera.main.pixelWidth;
+        float ImageHeight = Camera.main.pixelHeight;
+        var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
+        var headPosition = Camera.main.transform.position;
+        float textX = ocrResult.BoundingBox.x;
+        float textY = ocrResult.BoundingBox.y;
+        float textWidth =  ocrResult.BoundingBox.width;
+        float textHeight = ocrResult.BoundingBox.height;
+        var gazeDirection = Camera.main.transform.forward;
+        Debug.Log(ocrResult.BoundingBox);
+        Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
+        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (textWidth / 2), textY + (textHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+
+
+        RaycastHit hitCenter;
+        if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
+        {
+            Debug.Log("Raycasts hit!");
             
 
-            //drawer.SetPositions(new[] { headPosition, hitTopLeft.point });
-            //drawer.SetPositions(new[] { headPosition, hitTopRight.point });
-            //drawer.SetPositions(new[] { headPosition, hitBotLeft.point });
-
-            //GameObject newArea = Instantiate(textArea);
-            //TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+            GameObject newHighlight = Instantiate(textHighlight);
+            //TextMesh visualText = newHighlight.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
             //float distance = (hitCenter.point - headPosition).magnitude; ;
             //Debug.Log("TopLeft: " + hitTopLeft.point + "; TopRight: " + hitTopRight.point + "; BotLeft: " + hitBotLeft.point + "; BotRight: " + hitBotRight.point + "; center: " + hitCenter.point + "; Distance: " + distance);
             ////set Text
             //visualText.text = ocrResult.Text;
             //newArea.AddComponent<MeshRenderer>();
-           
-            ////set Position
-            //newArea.transform.position = hitCenter.point;
 
-            ////set Rotation
-            //Quaternion toQuat = Camera.main.transform.localRotation;
-            //toQuat.x = 0;
-            //toQuat.z = 0;
-            //newArea.transform.rotation = toQuat;
+            //set Position
+            newHighlight.transform.position = hitCenter.point;
+
+            //set Rotation
+            Quaternion toQuat = Camera.main.transform.localRotation;
+            toQuat.x = 0;
+            toQuat.z = 0;
+            newHighlight.transform.rotation = toQuat;
             ////Debug.Log(ocrResult.BoundingBox);
 
             ////set Size
@@ -172,6 +225,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
             //Debug.Log("scale.x new: " + scale.x + " ; scale.y new: " + scale.y);
         }
+
     }
 
     

@@ -371,7 +371,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d6024207aa522e47bc16ce93e2ed515, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  textArea: {fileID: 1279392830744612, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
+  textHighlight: {fileID: 0}
+  textArea: {fileID: 1587911854994306, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
 --- !u!114 &1383684482
 MonoBehaviour:
   m_ObjectHideFlags: 0
