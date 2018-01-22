@@ -48,7 +48,11 @@ public class Controller : Singleton<Controller>
     private List<CameraPositionResult> initiatedCameraPositionResultList = new List<CameraPositionResult>();
 
     // list with selected words to build request
-    private List<String> selectedWordsList = new List<String>();
+    public List<String> selectedWordsList = new List<String>();
+
+    // temporarily save focus/unfocus event data
+    private bool visualizedTextFocused;
+    private string focusedVisualizedTextTmp;
 
     /// <summary>
     /// called when the application is started
@@ -66,6 +70,8 @@ public class Controller : Singleton<Controller>
         apiManager.ImageAnalysed += onImageAnalysed;
         gesturesManager.Tapped += onTapped;
         gesturesManager.DoubleTapped += onDoubleTapped;
+        visualTextManager.VisualizedTextFocused += OnVisualizedTextFocused;
+        visualTextManager.VisualizedTextUnfocused += OnVisualizedTextUnfocused;
 
         analysingScreenshot = false;
         timeCounter = 0;
@@ -80,6 +86,9 @@ public class Controller : Singleton<Controller>
         cameraPositionResultTmp = new CameraPositionResult();
 
         currentId = 0;
+
+        visualizedTextFocused = false;
+        focusedVisualizedTextTmp = "";
     }
 
     void Update()
@@ -113,12 +122,15 @@ public class Controller : Singleton<Controller>
 
                     if (regularCameraPositionResultList.Count > 9)
                     {
+                        // removing game object
+                        Destroy(regularCameraPositionResultList[0].textHighlightObject);
+
                         regularCameraPositionResultList.RemoveAt(0);
                     }
 
                     cameraPositionResultTmp.id = currentId;
                     regularCameraPositionResultList.Insert(regularCameraPositionResultList.Count, cameraPositionResultTmp);
-                    Debug.Log("!!!!!RegularLIST Count" + regularCameraPositionResultList.Count);
+                    // Debug.Log("!!!!!RegularLIST Count" + regularCameraPositionResultList.Count);
                     apiManager.AnalyzeImageAsync(RequestType.LOCAL, new Picture(imageAsTextureTmp));
                     break;
                 case RequestCause.USERINITIATED:
@@ -128,11 +140,14 @@ public class Controller : Singleton<Controller>
 
                     if (initiatedCameraPositionResultList.Count > 9)
                     {
+                        // removing game object
+                        Destroy(initiatedCameraPositionResultList[0].visualizedTextObject);
+
                         initiatedCameraPositionResultList.RemoveAt(0);
                     }
                     cameraPositionResultTmp.id = currentId;
                     initiatedCameraPositionResultList.Insert(initiatedCameraPositionResultList.Count, cameraPositionResultTmp);
-                    Debug.Log("!!!!!InitiatedLIST Count" + initiatedCameraPositionResultList.Count);
+                    // Debug.Log("!!!!!InitiatedLIST Count" + initiatedCameraPositionResultList.Count);
                     apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
                     break;
             }
@@ -152,10 +167,15 @@ public class Controller : Singleton<Controller>
 
     private void onTapped(object sender, TapEventArgs e)
     {
-        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
-#if (!UNITY_EDITOR)
-        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
-#endif
+        if ((focusedVisualizedTextTmp != "" && focusedVisualizedTextTmp != null)
+            && (visualizedTextFocused))
+        { 
+            selectedWordsList.Add(focusedVisualizedTextTmp);
+        }
+//        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
+//#if (!UNITY_EDITOR)
+//        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
+//#endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)
@@ -169,11 +189,11 @@ public class Controller : Singleton<Controller>
         {
             if (e.Result.OcrService == OcrService.MICROSOFTAZUREOCR)
             {
-                Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + e.Result.OcrService + ": " + e.Result.Text + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                // Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + e.Result.OcrService + ": " + e.Result.Text + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             }
             else
             {
-                Debug.LogError(e.Result.OcrService + ": " + e.Result.Text);
+                //Debug.LogError(e.Result.OcrService + ": " + e.Result.Text);
             }
         }
 
@@ -198,7 +218,6 @@ public class Controller : Singleton<Controller>
         else
         {
             // check for capacity of result list
-
             switch (currentRequestCause)
             {
                 case RequestCause.REGULAR:
@@ -208,6 +227,8 @@ public class Controller : Singleton<Controller>
                         if (regularCameraPositionResultList[i].id == currentId)
                         {
                             regularCameraPositionResultList[i].ocrResult = e.Result;
+                            // visualize POI
+                            visualTextManager.hightlightTextLocation(regularCameraPositionResultList[i]);
                             currentId++;
                             break;
                         }
@@ -220,7 +241,9 @@ public class Controller : Singleton<Controller>
                         if (initiatedCameraPositionResultList[i].id == currentId)
                         {
                             initiatedCameraPositionResultList[i].ocrResult = e.Result;
-                             currentId++;
+                            // visualize text
+                            visualTextManager.visualizeText(initiatedCameraPositionResultList[i]);
+                            currentId++;
                             break;
                         }                                             
                     }                 
@@ -241,12 +264,22 @@ public class Controller : Singleton<Controller>
         
     }
 
+    public void OnVisualizedTextFocused(object sender, VisualizedTextFocusedEventArgs e)
+    {
+        visualizedTextFocused = true;
+        focusedVisualizedTextTmp = e.visualizedText;
+    }
+
+    public void OnVisualizedTextUnfocused(object sender, EventArgs e)
+    {
+        visualizedTextFocused = false;
+        focusedVisualizedTextTmp = "";
+    }
+
     public void displayText()
     {
         var size = regularCameraPositionResultList.Count;
-
-        visualTextManager.visualizeText(regularCameraPositionResultList.ElementAt(size - 1));
-
+        visualTextManager.hightlightTextLocation(regularCameraPositionResultList.ElementAt(size - 1));
     }
 
 

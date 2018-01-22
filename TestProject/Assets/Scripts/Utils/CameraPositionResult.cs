@@ -14,6 +14,10 @@ public class CameraPositionResult
     //result of recognition with screenshot
     public OcrResult ocrResult { get; set; }
 
+    public GameObject textHighlightObject { get; set; }
+
+    public GameObject visualizedTextObject { get; set; }
+
     // appropriate text object
 
 }

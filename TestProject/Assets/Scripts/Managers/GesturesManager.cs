@@ -63,6 +63,7 @@ public class GesturesManager: Singleton<GesturesManager> {
 #if (!UNITY_EDITOR)
         // send event to Controller
         TapEventArgs args = new TapEventArgs();
+        
         args.Word = "garlic";
         var handler = Tapped;
         if (handler != null) handler.Invoke(this, args);
