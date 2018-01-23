@@ -101,7 +101,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         //newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
     }
 
-    void sayHi(string what)
+    public void sayHi(string what)
     {
         Debug.Log("say " + what);
     }
@@ -115,18 +115,18 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float ImageHeight = Camera.main.pixelHeight;
         var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
         var headPosition = Camera.main.transform.position;
-        float textX = 0;//ocrResult.BoundingBox.x;
-        float textY = 0;//ocrResult.BoundingBox.y;
-        float textWidth = ImageWidth;// ocrResult.BoundingBox.width;
-        float textHeight = ImageHeight;// ocrResult.BoundingBox.height;
+        float textX = ocrResult.BoundingBox.x;
+        float textY = ocrResult.BoundingBox.y;
+        float textWidth = ocrResult.BoundingBox.width;
+        float textHeight =ocrResult.BoundingBox.height;
         var gazeDirection = Camera.main.transform.forward;
         Debug.Log(ocrResult.BoundingBox);
-        Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
-        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (ImageWidth / 2), textY + (ImageHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        //Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        //Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        //Vector3[] WorldSpaceBotLeft = convert2DtoWorld(textX, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
-        //Vector3[] WorldSpaceBotRight = convert2DtoWorld(textX + textWidth, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+       // Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
+        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (textWidth / 2), textY + (textHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceBotLeft = convert2DtoWorld(textX, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceBotRight = convert2DtoWorld(textX + textWidth, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         var CameraToWorld = cameraPositionResult.cameraToWorldMatrix;
         var Projection = cameraPositionResult.projectionMatrix;
 
@@ -136,20 +136,21 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
         RaycastHit hitCenter, hitTopLeft, hitTopRight, hitBotLeft, hitBotRight, hitGaze;
-       // if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
-            if (Physics.Raycast(headPosition, WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
+        if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
+           // if (Physics.Raycast(headPosition, WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
         {
             Debug.Log("Raycasts hit!");
 
-            //line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
+            Debug.Log("CenterRay: " + WorldSpaceCenter[1] + "\n GazeRay: " + gazeDirection);
+            line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
 
 
-            //line2.SetPositions(new[] { WorldSpaceTopRight[0], hitTopRight.point });
+            line2.SetPositions(new[] { WorldSpaceTopRight[0], hitTopRight.point });
 
-            //line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
+            line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
 
-            //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
-            line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
+            line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
+            //line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
             line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
 
 
@@ -176,21 +177,28 @@ public class VisualTextManager : Singleton<VisualTextManager>
             newArea.transform.rotation = toQuat;
 
             //set Size
-            Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
-            Vector3 currentSize = textAreaBox.size;
+           // Bounds textAreaBox = newArea.transform.Find("textAreaBox").gameObject.GetComponent<SpriteRenderer>().bounds;
 
-
+            //desired size
             float distance = (hitCenter.point - headPosition).magnitude; ;
-            //float targetWidth = (hitTopLeft.point - hitTopRight.point).magnitude / (distance);
-            //float targetHeight = (hitTopLeft.point - hitBotLeft.point).magnitude / (distance);
-            float currentWidth = currentSize.x;
-            float currentHeight = currentSize.y;
-            //float scaleWidth = targetWidth / currentWidth;
-            //float scaleHeight = targetHeight / currentHeight;
-            Vector3 scale = newArea.transform.localScale;
-            //scale.x = targetWidth * scale.x;
-            //scale.y = targetHeight * scale.y;
-            //newArea.transform.localScale = scale;
+            float targetWidth = (hitTopLeft.point - hitTopRight.point).magnitude;
+            float targetHeight = (hitTopLeft.point - hitBotLeft.point).magnitude;
+
+            //current size
+
+            Vector3 oldScale = newArea.transform.localScale;
+            RectTransform textBox = newArea.transform.GetComponent<RectTransform>();
+            float currentWidth = oldScale.x*textBox.rect.width;
+            float currentHeight = oldScale.y*textBox.rect.height;
+            
+            float scaleWidth = targetWidth / currentWidth;
+            float scaleHeight = targetHeight / currentHeight;
+
+            Vector3 newScale = new Vector3(scaleWidth *oldScale.x, scaleHeight*oldScale.y, oldScale.z);
+            Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight + "\n" + "currentWidth " + currentWidth + " ; currentHeight " + currentHeight + "\n" + "scaleWidth " + scaleWidth + " ; scaleHeight " + scaleHeight + "\n" + "oldScale: x:" + oldScale.x + " y: " + oldScale.y + "\n" + "newScale x: "+ newScale.x + " y: " + newScale.y);
+
+
+            newArea.transform.localScale = newScale ;
 
         }
     }
@@ -215,7 +223,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
         {
             Debug.Log("Raycasts hit!");
-
 
             GameObject newHighlight = Instantiate(textHighlight);
 
@@ -294,9 +301,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
         Vector3 WorldSpaceRayPoint2 = CameraToWorld.MultiplyVector(CameraSpacePos); // ray point in world space
         var headPosition = Camera.main.transform.position;
         var gazeDirection = Camera.main.transform.forward;
-        Debug.Log("Input x:" + x + " ;y: " + y + " ;head: " + headPosition + " ;gaze: " + gazeDirection*1000);
-        Debug.Log("ImagesPosZero: " + ImagePosZeroToOne + " ;ImagePosProjected" + ImagePosProjected + " ;CameraSpacePos " + CameraSpacePos + " ;Point1:" + WorldSpaceRayPoint1 + " ;Point2: " + WorldSpaceRayPoint2*1000);
-        Debug.Log("camera2world: " + CameraToWorld + " ; CameraSpacePos:" + CameraSpacePos * 100);
+        //Debug.Log("Input x:" + x + " ;y: " + y + " ;head: " + headPosition + " ;gaze: " + gazeDirection*1000);
+        //Debug.Log("ImagesPosZero: " + ImagePosZeroToOne + " ;ImagePosProjected" + ImagePosProjected + " ;CameraSpacePos " + CameraSpacePos + " ;Point1:" + WorldSpaceRayPoint1 + " ;Point2: " + WorldSpaceRayPoint2*1000);
+        //Debug.Log("camera2world: " + CameraToWorld + " ; CameraSpacePos:" + CameraSpacePos * 100);
         result[0] = WorldSpaceRayPoint1;
         result[1] = WorldSpaceRayPoint2;
 
