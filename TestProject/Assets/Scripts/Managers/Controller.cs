@@ -171,7 +171,9 @@ public class Controller : Singleton<Controller>
             && (visualizedTextFocused))
         { 
             selectedWordsList.Add(focusedVisualizedTextTmp);
+            visualTextManager.visualizeSelectedWords(selectedWordsList);
         }
+
 //        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
 //#if (!UNITY_EDITOR)
 //        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
@@ -182,7 +184,7 @@ public class Controller : Singleton<Controller>
     {
         if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED && e.Result.OcrService == OcrService.MICROSOFTMEDIAOCR)
         {
-            //regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
+            regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
             return;
         }
         else
@@ -228,7 +230,7 @@ public class Controller : Singleton<Controller>
                         {
                             regularCameraPositionResultList[i].ocrResult = e.Result;
                             // visualize POI
-                            visualTextManager.hightlightTextLocation(regularCameraPositionResultList[i]);
+                            visualTextManager.hightlightTextLocation(regularCameraPositionResultList, regularCameraPositionResultList[i]);
                             currentId++;
                             break;
                         }
@@ -279,7 +281,7 @@ public class Controller : Singleton<Controller>
     public void displayText()
     {
         var size = regularCameraPositionResultList.Count;
-        visualTextManager.hightlightTextLocation(regularCameraPositionResultList.ElementAt(size - 1));
+        visualTextManager.hightlightTextLocation(regularCameraPositionResultList, regularCameraPositionResultList.ElementAt(size - 1));
     }
 
 

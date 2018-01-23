@@ -71,6 +71,12 @@ public class VisualTextManager : Singleton<VisualTextManager>
     //    deFocusedObject.SendMessageUpwards("OnDefocus", SendMessageOptions.DontRequireReceiver);
     //}
 
+    public void  visualizeSelectedWords(List<String> selectedWordList)
+    {
+        // hologramm mit selektierten woertern
+
+    }
+
     void focusChanged(IPointingSource pointer, GameObject oldObject, GameObject newObject)
     {
         if (oldObject != null)
@@ -151,8 +157,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
 
 
-
-
             GameObject newArea = Instantiate(textArea);
 
             // saving ref to created game object for later
@@ -192,7 +196,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         }
     }
 
-    internal void hightlightTextLocation(CameraPositionResult cameraPositionResult)
+    internal void hightlightTextLocation(List<CameraPositionResult> regularCameraPositionResultList, CameraPositionResult cameraPositionResult)
     {
         float ImageWidth = Camera.main.pixelWidth;
         float ImageHeight = Camera.main.pixelHeight;
@@ -212,6 +216,31 @@ public class VisualTextManager : Singleton<VisualTextManager>
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
         {
             Debug.Log("Raycasts hit!");
+
+
+
+            // Lisa:
+            foreach (CameraPositionResult r in regularCameraPositionResultList)
+            {
+                if (r.textHighlightObject)
+                {
+                    float vdistance = (hitCenter.point - r.textHighlightObject.transform.position).magnitude;
+                    
+                    if (vdistance <= 0.3)
+                    {
+                        
+                        Destroy(r.textHighlightObject);
+                       
+                        regularCameraPositionResultList.Remove(r);
+                    }
+
+                }
+                
+            }
+
+
+
+
 
 
             GameObject newHighlight = Instantiate(textHighlight);
@@ -263,6 +292,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         }
 
     }
+
 
 
     public Vector3[] convert2DtoWorld(float x, float y, float imageWidth, float imageHeight, Matrix4x4 CameraToWorld, Matrix4x4 Projection)

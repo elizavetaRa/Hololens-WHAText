@@ -18,6 +18,4 @@ public class CameraPositionResult
 
     public GameObject visualizedTextObject { get; set; }
 
-    // appropriate text object
-
 }
