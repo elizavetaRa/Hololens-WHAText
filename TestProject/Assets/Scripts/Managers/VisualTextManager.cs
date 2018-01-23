@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using HoloToolkit.Unity.InputModule;
+using UnityEngine.UI;
 
 public class VisualTextManager : Singleton<VisualTextManager>
 {
     public GameObject textHighlight;
     public GameObject textArea;
     public GameObject requestButton;
+    public GameObject visualTextCanvas;
+
     // public GameObject LineRenderer;
     private GazeManager gazeManager;
     private FocusManager focusManager;
@@ -98,6 +101,11 @@ public class VisualTextManager : Singleton<VisualTextManager>
         //newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
     }
 
+    void sayHi(string what)
+    {
+        Debug.Log("say " + what);
+    }
+
 
 
 
@@ -147,12 +155,13 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
 
-            GameObject newArea = Instantiate(textArea);
+            GameObject newArea = Instantiate(visualTextCanvas);
 
             // saving ref to created game object for later
             cameraPositionResult.visualizedTextObject = newArea;
 
-            TextMesh visualText = newArea.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+
+            Text visualText = newArea.transform.Find("Text").gameObject.GetComponent<Text>();
 
             //set Text
             visualText.text = ocrResult.Text;

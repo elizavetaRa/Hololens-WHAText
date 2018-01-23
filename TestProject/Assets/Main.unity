@@ -378,6 +378,8 @@ MonoBehaviour:
   textArea: {fileID: 1587911854994306, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
   requestButton: {fileID: 1560599822609316, guid: 245f9bbed1cb2424b8a48da437e60679,
     type: 2}
+  visualTextCanvas: {fileID: 1833806045706196, guid: b84e43b82ad7779478c1358cc82d6565,
+    type: 2}
 --- !u!114 &1383684482
 MonoBehaviour:
   m_ObjectHideFlags: 0
