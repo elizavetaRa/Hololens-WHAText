@@ -86,9 +86,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
         if (newObject != null)
         {
             newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
-            if (newObject.tag != null && newObject.tag == "textArea")
+            if (newObject.tag != null && newObject.tag == "visualTextCanvas")
             {
-                TextMesh visualText = newObject.transform.Find("3DTextPrefab").gameObject.GetComponent<TextMesh>();
+                Text visualText = newObject.transform.Find("Text").gameObject.GetComponent<Text>();
                 string focusedtext = visualText.text;
 
                 VisualizedTextFocusedEventArgs args = new VisualizedTextFocusedEventArgs();
@@ -198,7 +198,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
             Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight + "\n" + "currentWidth " + currentWidth + " ; currentHeight " + currentHeight + "\n" + "scaleWidth " + scaleWidth + " ; scaleHeight " + scaleHeight + "\n" + "oldScale: x:" + oldScale.x + " y: " + oldScale.y + "\n" + "newScale x: "+ newScale.x + " y: " + newScale.y);
 
 
-            newArea.transform.localScale = newScale ;
+           // newArea.transform.localScale = newScale ;
 
         }
     }
