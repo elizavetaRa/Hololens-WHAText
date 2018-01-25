@@ -10,12 +10,14 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public GameObject textHighlight;
     public GameObject textArea;
     public GameObject requestButton;
+    public GameObject requestBox;
     // public GameObject LineRenderer;
     private GazeManager gazeManager;
     private FocusManager focusManager;
     private GameObject lineRendererObject;
     private LineRenderer line1, line2, line3, line4, line5;
     private GameObject searchButton;
+    private GameObject requestBoxInstance;
 
     public event EventHandler<VisualizedTextFocusedEventArgs> VisualizedTextFocused;
     public event EventHandler<EventArgs> VisualizedTextUnfocused;
@@ -27,6 +29,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
         focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
         searchButton = Instantiate(requestButton);
         searchButton.SetActive(false);
+
+        requestBoxInstance = Instantiate(requestBox);
+        requestBoxInstance.SetActive(false);
 
         this.lineRendererObject = this.transform.Find("LineRenderer").gameObject;
         this.line1 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
@@ -46,16 +51,17 @@ public class VisualTextManager : Singleton<VisualTextManager>
     // Update is called once per frame
     void Update()
     {
+        // 
         if (Controller.Instance.selectedWordsList.Count > 0 && searchButton.activeSelf == false)
         {
-            searchButton.SetActive(true);
-            searchButton.transform.position =new Vector3(1, 1, 0.2f);
+            //searchButton.SetActive(true);
+            //searchButton.transform.position =new Vector3(1, 1, 0.2f);
         }
 
         if (Controller.Instance.selectedWordsList.Count == 0)
         {
 
-            requestButton.SetActive(false);
+            //searchButton.SetActive(false);
         }
     }
 
@@ -74,6 +80,20 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public void  visualizeSelectedWords(List<String> selectedWordList)
     {
         // hologramm mit selektierten woertern
+
+        if (selectedWordList.Count > 0)
+        {
+            requestBoxInstance.SetActive(true);
+            requestBoxInstance.transform.position = new Vector3(1, 1, 0.2f);
+
+
+            //requestBox.GetComponentInChildren();
+            //searchButton.transform.position = new Vector3(1, 1, 0.2f);
+        }
+
+        //requestBox.SetActive(true);
+
+        //searchButton.transform.position = new Vector3(1, 1, 0.2f);
 
     }
 
@@ -118,8 +138,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float textWidth = ImageWidth;// ocrResult.BoundingBox.width;
         float textHeight = ImageHeight;// ocrResult.BoundingBox.height;
         var gazeDirection = Camera.main.transform.forward;
-        Debug.Log(ocrResult.BoundingBox);
-        Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
+        //Debug.Log(ocrResult.BoundingBox);
+       // Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
         Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (ImageWidth / 2), textY + (ImageHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         Vector3[] WorldSpaceTopLeft = convert2DtoWorld(textX, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         Vector3[] WorldSpaceTopRight = convert2DtoWorld(textX + textWidth, textY, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
@@ -207,15 +227,15 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float textWidth = ocrResult.BoundingBox.width;
         float textHeight = ocrResult.BoundingBox.height;
         var gazeDirection = Camera.main.transform.forward;
-        Debug.Log(ocrResult.BoundingBox);
-        Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
+        //Debug.Log(ocrResult.BoundingBox);
+        //Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
         Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (textWidth / 2), textY + (textHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
 
 
         RaycastHit hitCenter;
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
         {
-            Debug.Log("Raycasts hit!");
+           // Debug.Log("Raycasts hit!");
 
 
 

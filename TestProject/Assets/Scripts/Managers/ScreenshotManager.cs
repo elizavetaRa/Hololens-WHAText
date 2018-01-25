@@ -35,6 +35,8 @@ public class ScreenshotManager : Singleton<ScreenshotManager>
         // Use worst screenshot resolution to reduce CPU time
         _cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).Last();
 
+
+        Debug.Log("Camera resolution" + _cameraResolution);
         _screenshotsTakeable = false;
         _lastTime = 0.0f;
         _photoCount = 0;

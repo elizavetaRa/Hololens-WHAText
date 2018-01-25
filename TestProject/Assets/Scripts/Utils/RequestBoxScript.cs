@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class requestButtonScript : MonoBehaviour {
+public class RequestBoxScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
@@ -11,17 +11,6 @@ public class requestButtonScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //Debug.Log("active");
-		
+        Debug.Log("rBox active!");
 	}
-
-    void onFocus()
-    {
-
-    }
-
-    void onTapped()
-    {
-
-    }
 }
