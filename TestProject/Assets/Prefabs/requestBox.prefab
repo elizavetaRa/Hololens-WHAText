@@ -37,13 +37,13 @@ GameObject:
   m_Component:
   - component: {fileID: 224530661403147064}
   - component: {fileID: 223839681420000604}
-  - component: {fileID: 114660907938328692}
   - component: {fileID: 114915827788488102}
   - component: {fileID: 114771039284167964}
   - component: {fileID: 65748688072274652}
   - component: {fileID: 114234934461375648}
   - component: {fileID: 114266971668841700}
   - component: {fileID: 114141344445738198}
+  - component: {fileID: 114660907938328692}
   m_Layer: 5
   m_Name: requestBox
   m_TagString: Untagged
@@ -461,7 +461,7 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 20049547090947856, guid: 3eddd1c29199313478dd3f912bfab2ab, type: 2}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
