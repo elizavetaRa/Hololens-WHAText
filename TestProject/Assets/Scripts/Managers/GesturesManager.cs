@@ -20,11 +20,14 @@ public class GesturesManager: Singleton<GesturesManager> {
     public event EventHandler<DoubleTapEventArgs> DoubleTapped;
     const float DELAY = .5f;
 
+    public AudioClip singleTapSound, doubleTapSound;
+    private AudioSource source;
+
     // Use this for initialization
     void Start()
     {
-
-
+        // init audio source
+        source = GetComponent<AudioSource>();
 
         // create an new gesture recognizer to detect when user taps to shoot a screenshot
         gestureRecognizer = new GestureRecognizer();
@@ -59,6 +62,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     void SingleTap()
     {
         Debug.LogError("SingleTap was recognized.");
+        source.PlayOneShot(singleTapSound);
         // select words
 #if (!UNITY_EDITOR)
         // send event to Controller
@@ -74,6 +78,7 @@ public class GesturesManager: Singleton<GesturesManager> {
     void DoubleTap()
     {
         Debug.LogError("DoubleTap was recognized.");
+        source.PlayOneShot(doubleTapSound);
 #if (!UNITY_EDITOR)
         // send event to Controller
         DoubleTapEventArgs args = new DoubleTapEventArgs();
