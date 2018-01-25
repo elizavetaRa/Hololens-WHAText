@@ -184,6 +184,7 @@ public class Controller : Singleton<Controller>
     {
         if (!screenshotsTakeable && currentRequestCause == RequestCause.USERINITIATED && e.Result.OcrService == OcrService.MICROSOFTMEDIAOCR)
         {
+            Destroy(regularCameraPositionResultList[regularCameraPositionResultList.Count - 1].visualizedTextObject);
             regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
             return;
         }
@@ -205,14 +206,33 @@ public class Controller : Singleton<Controller>
             switch (currentRequestCause)
             {
                 case RequestCause.USERINITIATED:
+
+                    if (initiatedCameraPositionResultList.Count > 9)
+                    {
+                        // removing game object
+                        Destroy(initiatedCameraPositionResultList[0].visualizedTextObject);
+
+                        initiatedCameraPositionResultList.RemoveAt(0);
+                    }
                     Debug.LogError("No text was found, please reposition yourself and try again");
+
 
                     analysingScreenshot = false;
 
+                    Destroy(initiatedCameraPositionResultList[initiatedCameraPositionResultList.Count - 1].visualizedTextObject);
                     initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count-1);
                     break;
 
                 case RequestCause.REGULAR:
+
+                    if (regularCameraPositionResultList.Count > 9)
+                    {
+                        // removing game object
+                        Destroy(regularCameraPositionResultList[0].textHighlightObject);
+                        regularCameraPositionResultList.RemoveAt(0);
+                    }
+
+                    Destroy(regularCameraPositionResultList[regularCameraPositionResultList.Count - 1].textHighlightObject);
                     regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
                     break;
             }
@@ -223,6 +243,13 @@ public class Controller : Singleton<Controller>
             switch (currentRequestCause)
             {
                 case RequestCause.REGULAR:
+
+                    if (regularCameraPositionResultList.Count > 9)
+                    {
+                        // removing game object
+                        Destroy(regularCameraPositionResultList[0].textHighlightObject);
+                        regularCameraPositionResultList.RemoveAt(0);
+                    }
 
                     for (int i = 0; i < regularCameraPositionResultList.Count; i++)
                     {
@@ -238,13 +265,22 @@ public class Controller : Singleton<Controller>
 
                     break;
                 case RequestCause.USERINITIATED:
+
+                    if (initiatedCameraPositionResultList.Count > 9)
+                    {
+                        // removing game object
+                        Destroy(initiatedCameraPositionResultList[0].visualizedTextObject);
+
+                        initiatedCameraPositionResultList.RemoveAt(0);
+                    }
+
                     for (int i = 0; i < initiatedCameraPositionResultList.Count; i++)
                     {
                         if (initiatedCameraPositionResultList[i].id == currentId)
                         {
                             initiatedCameraPositionResultList[i].ocrResult = e.Result;
                             // visualize text
-                            visualTextManager.visualizeText(initiatedCameraPositionResultList[i]);
+                            visualTextManager.visualizeText(initiatedCameraPositionResultList, initiatedCameraPositionResultList[i]);
                             currentId++;
                             break;
                         }                                             

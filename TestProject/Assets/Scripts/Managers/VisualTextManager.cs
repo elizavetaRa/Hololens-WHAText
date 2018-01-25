@@ -129,7 +129,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
 
 
-    internal void visualizeText(CameraPositionResult cameraPositionResult)
+    internal void visualizeText(List<CameraPositionResult> initiatedCameraPositionResultList, CameraPositionResult cameraPositionResult)
     {
         float ImageWidth = 896;// Camera.main.pixelWidth;
         float ImageHeight = 504;// Camera.main.pixelHeight;
@@ -161,9 +161,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
            // if (Physics.Raycast(headPosition, WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
         {
-            Debug.Log("Raycasts hit!");
+            //Debug.Log("Raycasts hit!");
 
-            Debug.Log("CenterRay: " + WorldSpaceCenter[1] + "\n GazeRay: " + gazeDirection);
+            //Debug.Log("CenterRay: " + WorldSpaceCenter[1] + "\n GazeRay: " + gazeDirection);
             //line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
 
 
@@ -174,6 +174,24 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
             ////line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
             //line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
+
+
+            // Lisa:
+            for (int i = 0; i < initiatedCameraPositionResultList.Count; i++)
+            {
+                if (initiatedCameraPositionResultList[i].visualizedTextObject)
+                {
+                    float vdistance = (hitCenter.point - initiatedCameraPositionResultList[i].visualizedTextObject.transform.position).magnitude;
+
+                    if (vdistance <= 0.4)
+                    {
+                        Destroy(initiatedCameraPositionResultList[i].visualizedTextObject);
+                        initiatedCameraPositionResultList.RemoveAt(i);                      
+                    }
+
+                }
+
+            }
 
 
             GameObject newArea = Instantiate(visualTextCanvas);
@@ -251,17 +269,21 @@ public class VisualTextManager : Singleton<VisualTextManager>
                 {
                     float vdistance = (hitCenter.point - regularCameraPositionResultList[i].textHighlightObject.transform.position).magnitude;
 
-                    if (vdistance <= 0.2)
+                    if (vdistance <= 0.4)
                     {
+                        //Destroy(regularCameraPositionResultList[i].textHighlightObject);
+                        //regularCameraPositionResultList.RemoveAt(i);       
 
-                        Destroy(regularCameraPositionResultList[i].textHighlightObject);
-
-                       regularCameraPositionResultList.RemoveAt(i);
+                        //Destroy(regularCameraPositionResultList[i].textHighlightObject);
+                        regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
+                        return;             
                     }
 
                 }
 
             }
+
+            //Debug.Log("parent of dot" + textHighlight.);
 
             GameObject newHighlight = Instantiate(textHighlight);
 
