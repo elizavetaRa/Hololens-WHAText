@@ -6,6 +6,7 @@ TagManager:
   tags:
   - textArea
   - requestButton
+  - visualTextCanvas
   layers:
   - Default
   - TransparentFX

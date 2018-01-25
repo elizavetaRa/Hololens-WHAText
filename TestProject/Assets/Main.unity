@@ -199,6 +199,12 @@ Prefab:
       value: 
       objectReference: {fileID: 1188970988219600, guid: 245f9bbed1cb2424b8a48da437e60679,
         type: 2}
+    - target: {fileID: 114214883429176154, guid: 33e1e8b3550744c4e9431b992c6e2eac,
+        type: 2}
+      propertyPath: visualTextCanvas
+      value: 
+      objectReference: {fileID: 1731967800687038, guid: b84e43b82ad7779478c1358cc82d6565,
+        type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 33e1e8b3550744c4e9431b992c6e2eac, type: 2}
   m_IsPrefabParent: 0

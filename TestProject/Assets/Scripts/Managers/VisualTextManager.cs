@@ -98,21 +98,16 @@ public class VisualTextManager : Singleton<VisualTextManager>
                 if (handler != null) handler.Invoke(this, args);
             }
         }
-        //newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
     }
-
-    public void sayHi(string what)
-    {
-        Debug.Log("say " + what);
-    }
+    
 
 
 
 
     internal void visualizeText(CameraPositionResult cameraPositionResult)
     {
-        float ImageWidth = Camera.main.pixelWidth;
-        float ImageHeight = Camera.main.pixelHeight;
+        float ImageWidth = 896;// Camera.main.pixelWidth;
+        float ImageHeight = 504;// Camera.main.pixelHeight;
         var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
         var headPosition = Camera.main.transform.position;
         float textX = ocrResult.BoundingBox.x;
@@ -198,7 +193,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
             Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight + "\n" + "currentWidth " + currentWidth + " ; currentHeight " + currentHeight + "\n" + "scaleWidth " + scaleWidth + " ; scaleHeight " + scaleHeight + "\n" + "oldScale: x:" + oldScale.x + " y: " + oldScale.y + "\n" + "newScale x: "+ newScale.x + " y: " + newScale.y);
 
 
-           // newArea.transform.localScale = newScale ;
+           newArea.transform.localScale = newScale ;
 
         }
     }
