@@ -228,7 +228,7 @@ public class Controller : Singleton<Controller>
                         {
                             regularCameraPositionResultList[i].ocrResult = e.Result;
                             // visualize POI
-                            //visualTextManager.hightlightTextLocation(regularCameraPositionResultList[i]);
+                            visualTextManager.hightlightTextLocation(regularCameraPositionResultList[i]);
                             currentId++;
                             break;
                         }

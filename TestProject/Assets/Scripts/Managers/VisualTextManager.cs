@@ -137,16 +137,16 @@ public class VisualTextManager : Singleton<VisualTextManager>
             Debug.Log("Raycasts hit!");
 
             Debug.Log("CenterRay: " + WorldSpaceCenter[1] + "\n GazeRay: " + gazeDirection);
-            line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
+            //line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
 
 
-            line2.SetPositions(new[] { WorldSpaceTopRight[0], hitTopRight.point });
+            //line2.SetPositions(new[] { WorldSpaceTopRight[0], hitTopRight.point });
 
-            line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
+            //line3.SetPositions(new[] {WorldSpaceBotRight[0], hitBotRight.point });
 
-            line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
-            //line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
-            line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
+            //line4.SetPositions(new[] { WorldSpaceBotLeft[0], hitBotLeft.point });
+            ////line4.SetPositions(new[] { WorldSpaceCenter[0], hitGaze.point });
+            //line5.SetPositions(new[] { WorldSpaceCenter[0], hitCenter.point });
 
 
 
