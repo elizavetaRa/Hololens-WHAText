@@ -135,8 +135,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
            // if (Physics.Raycast(headPosition, WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
         {
             Debug.Log("Raycasts hit!");
-
-            Debug.Log("CenterRay: " + WorldSpaceCenter[1] + "\n GazeRay: " + gazeDirection);
+            
             //line1.SetPositions(new[] { WorldSpaceTopLeft[0], hitTopLeft.point });
 
 
@@ -190,7 +189,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
             float scaleHeight = targetHeight / currentHeight;
 
             Vector3 newScale = new Vector3(scaleWidth *oldScale.x, scaleHeight*oldScale.y, oldScale.z);
-            Debug.Log("targetwidth " + targetWidth + " ; targetHeight " + targetHeight + "\n" + "currentWidth " + currentWidth + " ; currentHeight " + currentHeight + "\n" + "scaleWidth " + scaleWidth + " ; scaleHeight " + scaleHeight + "\n" + "oldScale: x:" + oldScale.x + " y: " + oldScale.y + "\n" + "newScale x: "+ newScale.x + " y: " + newScale.y);
 
 
            newArea.transform.localScale = newScale ;
@@ -209,15 +207,12 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float textWidth = ocrResult.BoundingBox.width;
         float textHeight = ocrResult.BoundingBox.height;
         var gazeDirection = Camera.main.transform.forward;
-        Debug.Log(ocrResult.BoundingBox);
-        Debug.Log("textWidth: " + textWidth + "; textHeight: " + textHeight + "; camHeight: " + ImageHeight + "; camWidtht: " + ImageWidth);
         Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (textWidth / 2), textY + (textHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
 
 
         RaycastHit hitCenter;
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter))
         {
-            Debug.Log("Raycasts hit!");
 
             GameObject newHighlight = Instantiate(textHighlight);
 

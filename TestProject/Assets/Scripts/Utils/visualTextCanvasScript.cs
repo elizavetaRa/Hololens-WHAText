@@ -4,16 +4,16 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler , IPointerExitHandler{
+public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler{
 
     private Text text;
-    private SpriteRenderer textAreaBox;
+    private Image textAreaBox;
     private Vector3 originalSize;
 
     void Start()
     {
         //text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>();
-        textAreaBox = this.gameObject.GetComponentInChildren<SpriteRenderer>();
+        textAreaBox = this.gameObject.GetComponentInChildren<Image>();
         originalSize = textAreaBox.transform.localScale;
 
         //originalColor = textAreaBox.GetComponent<SpriteRenderer>().color;
@@ -36,6 +36,12 @@ public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler , IPoi
     }
 
     public void OnPointerEnter(PointerEventData eventData)
+    {
+
+        Debug.Log("message received");
+        textAreaBox.color = Color.blue;
+    }
+    public void OnPointerEnter()
     {
 
         Debug.Log("message received");
