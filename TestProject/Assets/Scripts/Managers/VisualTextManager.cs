@@ -164,6 +164,9 @@ public class VisualTextManager : Singleton<VisualTextManager>
             //set Position
             newArea.transform.position = hitCenter.point;
 
+            //opposite direction
+            Vector3 opposite = (WorldSpaceCenter[1] * -1.0f).normalized;
+            //newArea.transform.Translate(opposite);
             //set Rotation
             Quaternion toQuat = Camera.main.transform.localRotation;
             toQuat.x = 0;
@@ -198,8 +201,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
     internal void hightlightTextLocation(CameraPositionResult cameraPositionResult)
     {
-        float ImageWidth = Camera.main.pixelWidth;
-        float ImageHeight = Camera.main.pixelHeight;
+        float ImageWidth = 896;// Camera.main.pixelWidth;
+        float ImageHeight = 504;// Camera.main.pixelHeight;
         var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
         var headPosition = Camera.main.transform.position;
         float textX = ocrResult.BoundingBox.x;
@@ -207,7 +210,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         float textWidth = ocrResult.BoundingBox.width;
         float textHeight = ocrResult.BoundingBox.height;
         var gazeDirection = Camera.main.transform.forward;
-        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX + (textWidth / 2), textY + (textHeight / 2), ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
+        Vector3[] WorldSpaceCenter = convert2DtoWorld(textX , textY , ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
 
 
         RaycastHit hitCenter;
