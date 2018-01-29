@@ -169,15 +169,24 @@ public class Controller : Singleton<Controller>
     {
         if ((focusedVisualizedTextTmp != "" && focusedVisualizedTextTmp != null)
             && (visualizedTextFocused))
-        { 
-            selectedWordsList.Add(focusedVisualizedTextTmp);
+        {
+            //Test
+            selectedWordsList.Add("Broccoli");
+            selectedWordsList.Add("Tomatoes");
+            //selectedWordsList.Add(focusedVisualizedTextTmp);
             visualTextManager.visualizeSelectedWords(selectedWordsList);
-        }
+        } else {//Test
+            selectedWordsList.Add("Broccoli");
+        selectedWordsList.Add("Tomatoes");
+        //selectedWordsList.Add(focusedVisualizedTextTmp);
+        visualTextManager.visualizeSelectedWords(selectedWordsList);
+         }
+            
 
-//        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
-//#if (!UNITY_EDITOR)
-//        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
-//#endif
+        //        selectedWordsList.Insert(selectedWordsList.Count, e.Word);
+        //#if (!UNITY_EDITOR)
+        //        ApiYummlyRecipes.Instance.HttpGetRecipesByIngredients(new string[] { e.Word });
+        //#endif
     }
 
     private void onImageAnalysed(object sender, AnalyseImageEventArgs e)

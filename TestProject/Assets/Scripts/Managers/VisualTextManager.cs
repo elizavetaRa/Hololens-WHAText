@@ -19,7 +19,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     private GameObject lineRendererObject;
     private LineRenderer line1, line2, line3, line4, line5;
     private GameObject searchButton;
-    private GameObject requestBoxInstance;
+    //private GameObject requestBoxInstance;
 
     public event EventHandler<VisualizedTextFocusedEventArgs> VisualizedTextFocused;
     public event EventHandler<EventArgs> VisualizedTextUnfocused;
@@ -29,11 +29,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
         focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
-        searchButton = Instantiate(requestButton);
+        searchButton = Instantiate(requestButton);        
         searchButton.SetActive(false);
-
-        requestBoxInstance = Instantiate(requestBox);
-        requestBoxInstance.SetActive(false);
 
         this.lineRendererObject = this.transform.Find("LineRenderer").gameObject;
         this.line1 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
@@ -54,6 +51,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     void Update()
     {
         // 
+
         if (Controller.Instance.selectedWordsList.Count > 0 && searchButton.activeSelf == false)
         {
             //searchButton.SetActive(true);
@@ -82,20 +80,33 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public void  visualizeSelectedWords(List<String> selectedWordList)
     {
         // hologramm mit selektierten woertern
+        
+        //requestBoxInstance.SetActive(false);
+        //requestBoxInstance.SetActive(true);
+        
+                GameObject requestBoxInstance = Instantiate(requestBox);
 
         if (selectedWordList.Count > 0)
         {
-            requestBoxInstance.SetActive(true);
-            requestBoxInstance.transform.position = new Vector3(1, 1, 0.2f);
+            foreach (String w in selectedWordList)
+            {
+                if (requestBoxInstance.transform.Find("Text1").gameObject.GetComponent<Text>().text == "")
+                {
+                    requestBoxInstance.transform.Find("Text1").gameObject.GetComponent<Text>().text = w;
+                } else if (requestBoxInstance.transform.Find("Text2").gameObject.GetComponent<Text>().text == "")
+                {
+                    requestBoxInstance.transform.Find("Text2").gameObject.GetComponent<Text>().text = w;
+                }
+                else if (requestBoxInstance.transform.Find("Text3").gameObject.GetComponent<Text>().text == "")
+                {
+                    requestBoxInstance.transform.Find("Text3").gameObject.GetComponent<Text>().text = w;
+                }                          
 
+            }
 
-            //requestBox.GetComponentInChildren();
-            //searchButton.transform.position = new Vector3(1, 1, 0.2f);
+            requestBoxInstance.transform.position = new Vector3(1, -0.3f, 0.2f);  
         }
 
-        //requestBox.SetActive(true);
-
-        //searchButton.transform.position = new Vector3(1, 1, 0.2f);
 
     }
 
