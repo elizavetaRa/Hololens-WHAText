@@ -54,6 +54,9 @@ public class Controller : Singleton<Controller>
     private bool visualizedTextFocused;
     private string focusedVisualizedTextTmp;
 
+    // ref of the UI Notification Panel
+    private DialogPanel dialogPanel;
+
     /// <summary>
     /// called when the application is started
     /// </summary>
@@ -89,6 +92,8 @@ public class Controller : Singleton<Controller>
 
         visualizedTextFocused = false;
         focusedVisualizedTextTmp = "";
+
+        dialogPanel = DialogPanel.Instance();
     }
 
     void Update()
@@ -151,7 +156,7 @@ public class Controller : Singleton<Controller>
                     apiManager.AnalyzeImageAsync(RequestType.REMOTE, new Picture(imageAsTextureTmp));
                     break;
             }
-            
+
         }
 #endif
 

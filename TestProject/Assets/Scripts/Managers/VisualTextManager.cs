@@ -15,7 +15,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public GameObject visualTextCanvas;
     
     private GazeManager gazeManager;
-    private FocusManager focusManager;
+    // private FocusManager focusManager;
     private GameObject lineRendererObject;
     private LineRenderer line1, line2, line3, line4, line5;
     private GameObject searchButton;
@@ -28,7 +28,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     void Start()
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
-        focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
+        // focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
         searchButton = Instantiate(requestButton);
         searchButton.SetActive(false);
 
@@ -44,7 +44,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
 
-        focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
+        //focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
         
 
     }
