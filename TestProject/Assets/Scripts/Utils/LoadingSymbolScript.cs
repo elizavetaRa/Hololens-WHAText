@@ -15,6 +15,5 @@ public class LoadingSymbolScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		cursorPosition = 
 	}
 }

@@ -1,5 +1,6 @@
 ﻿
 using HoloToolkit.Unity;
+using HoloToolkit.Unity.InputModule;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
@@ -14,14 +15,14 @@ public class HologramPlacement : Singleton<HologramPlacement>
 
     void Start()
     {
-     //   GesturesManager.Instance.OverrideFocusedObject = this.gameObject;
+       InputManager.Instance.OverrideFocusedObject = this.gameObject;
     }
 
     void Update()
     {
         if (!GotTransform)
         {
-            transform.position = Vector3.Lerp(transform.position, ProposeTransformPosition(), 0.2f);
+            transform.position = Vector3.Lerp(transform.position, ProposeTransformPosition(), 0.5f);
         }
     }
 
@@ -37,7 +38,7 @@ public class HologramPlacement : Singleton<HologramPlacement>
     {
         // Note that we have a transform.
         GotTransform = true;
-       // GesturesManager.Instance.OverrideFocusedObject = null;
+        InputManager.Instance.OverrideFocusedObject = null;
     }
 
     public void ResetStage()

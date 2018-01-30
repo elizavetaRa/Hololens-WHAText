@@ -21,6 +21,13 @@ public class Controller : Singleton<Controller>
     /// <summary> reference to the API manager instance </summary>
     private GesturesManager gesturesManager;
 
+    //Objects to replace Cursor with animation
+    private GameObject cursor;
+    private Vector3 cursorSize;
+    public GameObject loadingIcon;
+
+
+
     private float timeCounter;
     /// <summary> Interval in which images are being process regularly</summary>
     private float timeInterval;
@@ -65,6 +72,14 @@ public class Controller : Singleton<Controller>
         visualTextManager = VisualTextManager.Instance;
         gesturesManager = GesturesManager.Instance;
 
+
+        // Link IconObjects, deactivate animation
+        loadingIcon =  Instantiate(loadingIcon);
+        loadingIcon.SetActive(false);
+        cursor = GameObject.Find("CursorVisual");
+        cursorSize = cursor.transform.localScale;
+
+
         // subscribe to events
         screenshotManager.ScreenshotTaken += OnScreenshotTaken;
         apiManager.ImageAnalysed += onImageAnalysed;
@@ -93,6 +108,17 @@ public class Controller : Singleton<Controller>
 
     void Update()
     {
+        //if the system is busy, make cursor invisible and animation active
+        if (!screenshotsTakeable)
+        {
+            loadingIcon.SetActive(true);
+            cursor.transform.localScale = new Vector3(0, 0, 0);
+        }
+        else
+        {
+            loadingIcon.SetActive(false);
+            cursor.transform.localScale = cursorSize;
+        }
 
     }
 
