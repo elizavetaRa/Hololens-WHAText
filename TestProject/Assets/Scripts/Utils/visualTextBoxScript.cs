@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class visualTextBoxScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerUpHandler
+public class visualTextBoxScript : MonoBehaviour
 {
 
     private Image textAreaBox;
@@ -24,37 +24,8 @@ public class visualTextBoxScript : MonoBehaviour, IPointerEnterHandler, IPointer
 
     public void OnFocus()
     {
-        Debug.Log("focused");
-    }
-    public void onThis()
-    {
 
-        Debug.Log("message received OnThis Box");
-        textAreaBox.color = Color.blue;
-    }
-    
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        Debug.Log("message received internal onPointerEnter Box");
-        //textAreaBox.color = Color.blue;
     }
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        Debug.Log("message received internal onPointerExit Box");
-        textAreaBox.color = Color.red;
-    }
-    
 
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        Debug.Log("message received onpointerup received");
-        textAreaBox.color = Color.blue;
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        Debug.Log("message received OnClick Box");
-        textAreaBox.color = Color.blue;
-    }
 }

@@ -5,20 +5,19 @@ using UnityEngine;
 using System;
 using HoloToolkit.Unity.InputModule;
 using UnityEngine.UI;
+using UnityEngine.VR.WSA.WebCam;
 
 public class VisualTextManager : Singleton<VisualTextManager>
 {
     public GameObject textHighlight;
     public GameObject textArea;
-    public GameObject requestButton;
     public GameObject visualTextCanvas;
-
     // public GameObject LineRenderer;
     private GazeManager gazeManager;
     private FocusManager focusManager;
     private GameObject lineRendererObject;
     private LineRenderer line1, line2, line3, line4, line5;
-    private GameObject searchButton;
+    private float imageWidth, imageHeight;
 
     public event EventHandler<VisualizedTextFocusedEventArgs> VisualizedTextFocused;
     public event EventHandler<EventArgs> VisualizedTextUnfocused;
@@ -28,9 +27,6 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
         focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
-        searchButton = Instantiate(requestButton);
-        searchButton.SetActive(false);
-
         this.lineRendererObject = this.transform.Find("LineRenderer").gameObject;
         this.line1 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line2 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
@@ -38,6 +34,8 @@ public class VisualTextManager : Singleton<VisualTextManager>
         this.line4 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line5 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
 
+        imageWidth = ScreenshotManager.Instance.cameraWidth;
+        imageHeight = ScreenshotManager.Instance.cameraHeight;
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
 
         focusManager.PointerSpecificFocusChanged += new FocusManager.PointerSpecificFocusChangedMethod(focusChanged);
@@ -49,17 +47,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     // Update is called once per frame
     void Update()
     {
-        if (Controller.Instance.selectedWordsList.Count > 0 && searchButton.activeSelf == false)
-        {
-            searchButton.SetActive(true);
-            searchButton.transform.position =new Vector3(1, 1, 0.2f);
-        }
 
-        if (Controller.Instance.selectedWordsList.Count == 0)
-        {
-
-            requestButton.SetActive(false);
-        }
     }
 
     //internal void focusTextArea(GameObject focusedObject)
@@ -108,6 +96,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         float ImageWidth = 896;// Camera.main.pixelWidth;
         float ImageHeight = 504;// Camera.main.pixelHeight;
+
         var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
         var headPosition = Camera.main.transform.position;
         float textX = ocrResult.BoundingBox.x;
@@ -124,11 +113,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         Vector3[] WorldSpaceBotRight = convert2DtoWorld(textX + textWidth, textY + textHeight, ImageWidth, ImageHeight, cameraPositionResult.cameraToWorldMatrix, cameraPositionResult.projectionMatrix);
         var CameraToWorld = cameraPositionResult.cameraToWorldMatrix;
         var Projection = cameraPositionResult.projectionMatrix;
-
-
-
-
-
+        
 
         RaycastHit hitCenter, hitTopLeft, hitTopRight, hitBotLeft, hitBotRight, hitGaze;
         if (Physics.Raycast(WorldSpaceCenter[0], WorldSpaceCenter[1], out hitCenter) && Physics.Raycast(WorldSpaceTopLeft[0], WorldSpaceTopLeft[1], out hitTopLeft) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceTopRight[1], out hitTopRight) && Physics.Raycast(WorldSpaceBotLeft[0], WorldSpaceBotLeft[1], out hitBotLeft) && Physics.Raycast(WorldSpaceBotRight[0], WorldSpaceBotRight[1], out hitBotRight) && Physics.Raycast(headPosition, gazeDirection, out hitGaze))
@@ -203,6 +188,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     {
         float ImageWidth = 896;// Camera.main.pixelWidth;
         float ImageHeight = 504;// Camera.main.pixelHeight;
+
         var ocrResult = cameraPositionResult.ocrResult; //new OcrResult("hi", new Rect(ImageWidth / 2, ImageHeight / 2, 0, 0));
         var headPosition = Camera.main.transform.position;
         float textX = ocrResult.BoundingBox.x;

@@ -262,9 +262,9 @@ MonoBehaviour:
   textHighlight: {fileID: 1301596897392316, guid: 8b9575498fdf5e649b714bffe77320c2,
     type: 2}
   textArea: {fileID: 1587911854994306, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
-  requestButton: {fileID: 1188970988219600, guid: 245f9bbed1cb2424b8a48da437e60679,
+  visualTextCanvas: {fileID: 1281357578881434, guid: b84e43b82ad7779478c1358cc82d6565,
     type: 2}
-  visualTextCanvas: {fileID: 1212421827562362, guid: b84e43b82ad7779478c1358cc82d6565,
+  loadingIcon: {fileID: 1960234528222254, guid: 2c99224b9e4135a498fd287146b7e7b9,
     type: 2}
 --- !u!114 &334836238
 MonoBehaviour:
@@ -303,6 +303,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0a9452558c105e45824db49e3a5997e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraWidth: 0
+  cameraHeight: 0
   _screenshotsTakeable: 0
 --- !u!114 &334836241
 MonoBehaviour:
@@ -331,6 +333,7 @@ Transform:
   - {fileID: 1660657180}
   - {fileID: 1848867278}
   - {fileID: 116824383}
+  - {fileID: 1194807695}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -981,7 +984,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 334836242}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1421968840
@@ -1310,7 +1313,7 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1848867277}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13d883c0118351e4890753200e0ac916, type: 3}
   m_Name: 
