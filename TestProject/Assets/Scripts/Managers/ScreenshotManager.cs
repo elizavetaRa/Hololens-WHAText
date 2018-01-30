@@ -15,10 +15,11 @@ public class ScreenshotManager : Singleton<ScreenshotManager>
 
     Resolution _cameraResolution;
     CameraParameters _cameraParameters;
-
+    
     // temporarily saving data of the latest frame captured
     Matrix4x4 _cameraToWorldMatrixTmp, _projectionMatrixTmp;
     Texture2D _imageAsTextureTmp;
+    public float cameraWidth, cameraHeight;
 
     public bool _screenshotsTakeable;
 
@@ -83,6 +84,8 @@ public class ScreenshotManager : Singleton<ScreenshotManager>
         _cameraParameters.hologramOpacity = 0.0f;
         _cameraParameters.cameraResolutionWidth = _cameraResolution.width;
         _cameraParameters.cameraResolutionHeight = _cameraResolution.height;
+        cameraWidth = _cameraParameters.cameraResolutionWidth;
+        cameraHeight = _cameraParameters.cameraResolutionHeight;
         _cameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
 
         // Activate the web camera
