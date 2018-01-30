@@ -18,7 +18,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     
     // public GameObject LineRenderer;
     private GazeManager gazeManager;
-    private FocusManager focusManager;
+     private FocusManager focusManager;
     private GameObject lineRendererObject;
     private LineRenderer line1, line2, line3, line4, line5;
     private float imageWidth, imageHeight;
@@ -29,7 +29,10 @@ public class VisualTextManager : Singleton<VisualTextManager>
     void Start()
     {
         gazeManager = this.gameObject.GetComponentInChildren<GazeManager>();
-        focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
+         focusManager = this.gameObject.GetComponentInChildren<FocusManager>();
+
+        requestBoxInstance = Instantiate(requestBox);
+        requestBoxInstance.SetActive(false);
 
         this.lineRendererObject = this.transform.Find("LineRenderer").gameObject;
         this.line1 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
@@ -196,17 +199,18 @@ public class VisualTextManager : Singleton<VisualTextManager>
             cameraPositionResult.visualizedTextObject = newArea;
 
 
-            Text visualText = newArea.transform.Find("Text").gameObject.GetComponent<Text>();
+           // Text visualText = newArea.transform.Find("Text").gameObject.GetComponent<Text>();
 
             //set Text
-            visualText.text = ocrResult.Text;
+            newArea.transform.Find("Text").gameObject.GetComponent<Text>().text = ocrResult.Text;
 
             //set Position
             newArea.transform.position = hitCenter.point;
 
             //opposite direction
-            Vector3 opposite = (WorldSpaceCenter[1] * -1.0f).normalized;
+            Vector3 opposite = (WorldSpaceCenter[1] * -0.5f).normalized;
             //newArea.transform.Translate(opposite);
+
             //set Rotation
             Quaternion toQuat = Camera.main.transform.localRotation;
             toQuat.x = 0;

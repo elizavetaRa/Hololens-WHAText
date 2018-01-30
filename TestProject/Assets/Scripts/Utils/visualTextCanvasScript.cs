@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler
 { 
     private Text text;
     private Image textAreaBox;
@@ -19,11 +19,12 @@ public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPoin
         originalSize = textAreaBox.transform.localScale;
         //Debug.Log("started");
         //originalColor = textAreaBox.GetComponent<SpriteRenderer>().color;
-        textAreaBox.transform.localScale = new Vector3(0, 0, 0);
+       // textAreaBox.transform.localScale = new Vector3(0, 0, 0);
     }
 
     void OnFocus()
     {
+        //Debug.Log("focused:" + this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text);
 
     }
     void OnDefocus()
@@ -35,7 +36,6 @@ public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPoin
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        
         this.textAreaBox.transform.localScale = originalSize;
     }
     public void OnPointerExit(PointerEventData eventData)
@@ -47,15 +47,23 @@ public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPoin
     public void OnPointerClick(PointerEventData eventData)
     {
         //   textAreaBox.color = Color.red;
-        string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<TextMesh>().text;
+        string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
         Controller.Instance.selectedWordsList.Add(text);
-        Debug.Log(Controller.Instance.selectedWordsList);
+        Debug.Log("tesstte");
     }
 
     public void AddText()
     {
-        string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<TextMesh>().text;
+        //string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
+        //Controller.Instance.selectedWordsList.Add(text);
+        Debug.Log(this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text);
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
         Controller.Instance.selectedWordsList.Add(text);
-        Debug.Log(Controller.Instance.selectedWordsList);
+        Debug.Log("tesstte");
+
     }
 }

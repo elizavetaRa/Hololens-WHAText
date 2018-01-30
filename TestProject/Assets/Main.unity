@@ -264,7 +264,7 @@ MonoBehaviour:
   textArea: {fileID: 1587911854994306, guid: 55b4745dfd1ee1340a0cce72b8260c9d, type: 2}
   requestBox: {fileID: 1353724175625172, guid: 2c5842567f4368642ab403d4f2dd998a, type: 2}
   requestBoxInstance: {fileID: 0}
-  visualTextCanvas: {fileID: 1281357578881434, guid: b84e43b82ad7779478c1358cc82d6565,
+  visualTextCanvas: {fileID: 1291723522255484, guid: b84e43b82ad7779478c1358cc82d6565,
     type: 2}
 --- !u!114 &334836238
 MonoBehaviour:
@@ -278,6 +278,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a86abcc962dd785429286459daabd0d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  singleTapSound: {fileID: 8300000, guid: 1f591cc684a38784fbf7657ae03a60e7, type: 3}
+  doubleTapSound: {fileID: 8300000, guid: 612a5f896bca17d418923def304acfc3, type: 3}
 --- !u!114 &334836239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1315,7 +1317,7 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1848867277}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 13d883c0118351e4890753200e0ac916, type: 3}
   m_Name: 
