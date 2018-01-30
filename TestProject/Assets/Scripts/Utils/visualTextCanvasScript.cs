@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler , IPointerExitHandler{
-
+public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler , IPointerExitHandler{
+{
     private Text text;
     private SpriteRenderer textAreaBox;
     private Vector3 originalSize;

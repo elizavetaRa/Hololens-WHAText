@@ -12,6 +12,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public GameObject textArea;
     public GameObject requestButton;
     public GameObject requestBox;
+    public GameObject requestBoxInstance;
     public GameObject visualTextCanvas;
     
     private GazeManager gazeManager;
@@ -38,6 +39,12 @@ public class VisualTextManager : Singleton<VisualTextManager>
         this.line3 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line4 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
         this.line5 = Instantiate(this.lineRendererObject).GetComponent<LineRenderer>();
+
+        //requestBoxInstance.SetActive(false);
+        //requestBoxInstance.SetActive(true);
+
+        requestBoxInstance = Instantiate(requestBox);
+        requestBoxInstance.SetActive(false);
 
         //gazeManager.FocusedObjectChanged += new GazeManager.FocusedChangedDelegate(focusChanged);
 
@@ -80,11 +87,14 @@ public class VisualTextManager : Singleton<VisualTextManager>
     public void  visualizeSelectedWords(List<String> selectedWordList)
     {
         // hologramm mit selektierten woertern
-        
+
         //requestBoxInstance.SetActive(false);
-        //requestBoxInstance.SetActive(true);
-        
-                GameObject requestBoxInstance = Instantiate(requestBox);
+
+        if (!requestBoxInstance.active)
+        {
+            requestBoxInstance.SetActive(true);
+        }
+                //GameObject requestBoxInstance = Instantiate(requestBox);
 
         if (selectedWordList.Count > 0)
         {
@@ -104,7 +114,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
 
             }
 
-            requestBoxInstance.transform.position = new Vector3(1, -0.3f, 0.2f);  
+            requestBoxInstance.transform.position = new Vector3(1, -2f, 0.2f);  
         }
 
 
