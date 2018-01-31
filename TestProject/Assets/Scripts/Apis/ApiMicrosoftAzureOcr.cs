@@ -289,6 +289,8 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                 }
             }
 
+            DialogPanel dialogPanelInstance = DialogPanel.Instance();
+            dialogPanelInstance.enqueueNotification("Text wurde erkannt: " + OcrResult.Text);
             this.OcrResult = new OcrResult(text, new UnityEngine.Rect(xMin, yMin, (xMax - xMin), (yMax - yMin)), OcrService.MICROSOFTAZUREOCR);
         }
            
