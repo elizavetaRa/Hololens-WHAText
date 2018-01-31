@@ -22,6 +22,7 @@ public class ApiYummlyRecipes
     private int maxTries = 3;
     // Delay Time Between Request Sendings in ms
     private int delay = 200;
+    private DialogPanel dialogPanel;
 
     private ApiYummlyRecipes(string ApiKey)
     {
@@ -29,6 +30,7 @@ public class ApiYummlyRecipes
             this.ApiKey = ApiKey;
 
         Debug.LogError("<YummlyRecipes> Api created");
+        dialogPanel = DialogPanel.Instance();
     }
 
     public static ApiYummlyRecipes Instance
@@ -121,12 +123,14 @@ public class ApiYummlyRecipes
 
                 if (contentString == "" || contentString == null)
                 {
-                    Debug.LogError("<YummlyRecipe> No text found");
+                    Debug.LogError("<YummlyRecipe> No recipes found");
+                    dialogPanel.enqueueNotification("No Recipes found. Try another search input.");
                 }
                 else
                 {
                     // Debug.LogError(contentString);
                     RecipeResult = JsonConvert.DeserializeObject<RecipeResult.RootObject>(contentString);
+                    return RecipeResult;
                     Debug.LogError("<YummlyRecipe> " + RecipeResult.totalMatchCount + " Recipes found.");
                 }
 
@@ -146,9 +150,10 @@ public class ApiYummlyRecipes
                 count++;
             }
 
-            }
+        }
 
-            return RecipeResult;
+        dialogPanel.enqueueNotification("Network Error. Please try again.");
+        return null;
     }
 #endif
 

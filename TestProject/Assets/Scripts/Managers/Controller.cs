@@ -222,24 +222,13 @@ public class Controller : Singleton<Controller>
             regularCameraPositionResultList.RemoveAt(regularCameraPositionResultList.Count-1);
             return;
         }
-        else
-        {
-            if (e.Result.OcrService == OcrService.MICROSOFTAZUREOCR)
-            {
-                // Debug.LogError("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + e.Result.OcrService + ": " + e.Result.Text + "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            }
-            else
-            {
-                //Debug.LogError(e.Result.OcrService + ": " + e.Result.Text);
-            }
-        }
-
 
         if (e.Result == null || e.Result.Text == "")
         {
-            switch (currentRequestCause)
+            // Checking for Used API
+            switch (e.Result.OcrService)
             {
-                case RequestCause.USERINITIATED:
+                case OcrService.MICROSOFTAZUREOCR:
 
                     if (initiatedCameraPositionResultList.Count > 9)
                     {
@@ -248,8 +237,8 @@ public class Controller : Singleton<Controller>
 
                         initiatedCameraPositionResultList.RemoveAt(0);
                     }
-                    Debug.LogError("No text was found, please reposition yourself and try again");
 
+                    dialogPanel.enqueueNotification("No Text found. Please reposition yourself.");
 
                     analysingScreenshot = false;
 
@@ -257,7 +246,7 @@ public class Controller : Singleton<Controller>
                     initiatedCameraPositionResultList.RemoveAt(initiatedCameraPositionResultList.Count-1);
                     break;
 
-                case RequestCause.REGULAR:
+                case OcrService.MICROSOFTMEDIAOCR:
 
                     if (regularCameraPositionResultList.Count > 9)
                     {
@@ -274,9 +263,9 @@ public class Controller : Singleton<Controller>
         else
         {
             // check for capacity of result list
-            switch (currentRequestCause)
+            switch (e.Result.OcrService)
             {
-                case RequestCause.REGULAR:
+                case OcrService.MICROSOFTMEDIAOCR:
 
                     if (regularCameraPositionResultList.Count > 9)
                     {
@@ -298,7 +287,7 @@ public class Controller : Singleton<Controller>
                     }
 
                     break;
-                case RequestCause.USERINITIATED:
+                case OcrService.MICROSOFTAZUREOCR:
 
                     if (initiatedCameraPositionResultList.Count > 9)
                     {

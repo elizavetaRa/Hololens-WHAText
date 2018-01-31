@@ -24,6 +24,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
     private int maxTries = 3;
     // Delay Time Between Request Sendings in ms
     private int delay = 200;
+    private DialogPanel dialogPanel;
 
     private ApiMicrosoftAzureOcr(string ApiKey)
     {
@@ -31,6 +32,7 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
             this.ApiKey = ApiKey;
 
         this.OcrResult = new OcrResult("", new UnityEngine.Rect(0, 0, 0, 0), OcrService.MICROSOFTAZUREOCR);
+        dialogPanel = DialogPanel.Instance();
     }
 
     public static ApiMicrosoftAzureOcr Instance
@@ -128,24 +130,18 @@ public class ApiMicrosoftAzureOcr : IServiceAdaptor
                     //System.Diagnostics.Debug.WriteLine(JsonPrettyPrint(contentString));
 
                     ParseResponseData(contentString);
-                    // Debug.LogError("<AzureOCR> " + OcrResult.Text);
-                    break;
-                }
-
-                catch (HttpRequestException httpException)
-                {
-                    Debug.LogError(httpException);
-                    throw new HttpRequestException("HTTP Request Error");
+                    return OcrResult;
                 }
 
                 catch (Exception e)
                 {
-                    // Debug.LogError("<AzureOCR> Api Request Error: " + e);
                     await Task.Delay(delay);
                     count++;
                 }
                    
             }
+
+            dialogPanel.enqueueNotification("Network Error. Please try again.");
         }
 
         //System.Diagnostics.Debug.WriteLine("OCR finished");
