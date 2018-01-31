@@ -203,7 +203,7 @@ public class Controller : Singleton<Controller>
             && (visualizedTextFocused))
         {
             //Test
-            //selectedWordsList.Add(focusedVisualizedTextTmp);
+            selectedWordsList.Add(focusedVisualizedTextTmp);
             visualTextManager.visualizeSelectedWords(selectedWordsList);
         } 
             

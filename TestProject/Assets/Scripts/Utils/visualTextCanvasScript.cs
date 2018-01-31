@@ -6,9 +6,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IPointerDownHandler
+public class visualTextCanvasScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 { 
-    private Text text;
+    //private Text text;
     private Image textAreaBox;
     private Vector3 originalSize;
 
@@ -19,7 +19,7 @@ public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler, IPo
         originalSize = textAreaBox.transform.localScale;
         //Debug.Log("started");
         //originalColor = textAreaBox.GetComponent<SpriteRenderer>().color;
-       // textAreaBox.transform.localScale = new Vector3(0, 0, 0);
+        textAreaBox.transform.localScale = new Vector3(0, 0, 0);
     }
 
     void OnFocus()
@@ -49,7 +49,7 @@ public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler, IPo
         //   textAreaBox.color = Color.red;
         string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
         Controller.Instance.selectedWordsList.Add(text);
-        Debug.Log("tesstte");
+        Debug.Log("clicked: " + text);
     }
 
     public void AddText()
@@ -58,12 +58,6 @@ public class visualTextCanvasScript : MonoBehaviour//, IPointerEnterHandler, IPo
         //Controller.Instance.selectedWordsList.Add(text);
         Debug.Log(this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text);
     }
-
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
-        Controller.Instance.selectedWordsList.Add(text);
-        Debug.Log("tesstte");
-
+    
     }
-}
+

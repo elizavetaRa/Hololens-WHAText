@@ -124,6 +124,7 @@ public class VisualTextManager : Singleton<VisualTextManager>
         if (newObject != null)
         {
             newObject.SendMessageUpwards("OnFocus", SendMessageOptions.DontRequireReceiver);
+            Debug.Log("newObject: " + newObject.name);
             if (newObject.tag != null && newObject.tag == "visualTextCanvas")
             {
                 Text visualText = newObject.transform.Find("Text").gameObject.GetComponent<Text>();

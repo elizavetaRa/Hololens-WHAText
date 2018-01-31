@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class visualTextBoxScript : MonoBehaviour , IPointerClickHandler
+public class visualTextBoxScript : MonoBehaviour //, IPointerClickHandler
 {
 
     private Image textAreaBox;
@@ -27,13 +27,13 @@ public class visualTextBoxScript : MonoBehaviour , IPointerClickHandler
 
     }
 
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        //   textAreaBox.color = Color.red;
-        //string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
-        //Controller.Instance.selectedWordsList.Add(text);
-        Debug.Log("tesstte");
-    }
+    //public void OnPointerClick(PointerEventData eventData)
+    //{
+    //    //   textAreaBox.color = Color.red;
+    //    //string text = this.gameObject.transform.Find("Text").gameObject.GetComponent<Text>().text;
+    //    //Controller.Instance.selectedWordsList.Add(text);
+    //    Debug.Log("tesstte");
+    //}
 
 
 }
